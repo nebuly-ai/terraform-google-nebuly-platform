@@ -1,0 +1,7 @@
+**/.terraform/
+*.secrets.auto.tfvars
+secrets.auto.tfvars
+.idea/
+backend.tfvars
+.terraform.lock.hcl
+credentials.json
