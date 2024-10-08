@@ -2,7 +2,7 @@
 
 Terraform module for provisioning Nebuly Platform resources on GCP.
 
-Available on [Terraform Registry](https://registry.terraform.io/modules/nebuly-ai/nebuly-platform/gcp/latest).
+Available on [Terraform Registry](https://registry.terraform.io/modules/nebuly-ai/nebuly-platform/google/latest).
 
 ## Prerequisites
 
