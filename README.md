@@ -89,12 +89,6 @@ authenticating with your Docker registry and pulling the Nebuly Docker images.
 
 ### 4. Bootstrap GKE cluster
 
-Retrieve the auto-generated values from the Terraform outputs and save them to a file named `values-bootstrap.yaml`:
-
-```shell
-terraform output helm_values_bootstrap
-```
-
 Install the bootstrap Helm chart to set up all the dependencies required for installing the Nebuly Platform Helm chart on GKE.
 
 Refer to the [chart documentation](https://github.com/nebuly-ai/helm-charts/tree/main/bootstrap-gcp) for all the configuration details.
@@ -103,8 +97,7 @@ Refer to the [chart documentation](https://github.com/nebuly-ai/helm-charts/tree
 helm install oci://ghcr.io/nebuly-ai/helm-charts/bootstrap-gcp \
   --namespace nebuly-bootstrap \
   --generate-name \
-  --create-namespace \
-  -f values-bootstrap.yaml
+  --create-namespace 
 ```
 
 

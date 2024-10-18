@@ -4,13 +4,6 @@ output "gke_cluster_get_credentials" {
 }
 
 # ------ Deploy ------ #
-#output "helm_values_bootstrap" {
-#  value       = local.bootstrap_helm_values
-#  sensitive   = true
-#  description = <<EOT
-#  The `bootrap.values.yaml` file for installing the Nebuly AWS Boostrap chart with Helm.
-#  EOT
-#}
 output "helm_values" {
   value       = local.helm_values
   sensitive   = true
