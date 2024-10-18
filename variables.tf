@@ -155,6 +155,11 @@ variable "gke_node_pools" {
     node_locations = optional(set(string), null)
     preemptible    = optional(bool, false)
     labels         = optional(map(string), {})
+    taints = optional(set(object({
+      key    = string
+      value  = string
+      effect = string
+    })), null)
     guest_accelerator = optional(object({
       type  = string
       count = number
@@ -162,7 +167,7 @@ variable "gke_node_pools" {
   }))
   default = {
     "web-services" : {
-      machine_type = "n2-highmem-4"
+      machine_type = "n4-highmem-4"
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1

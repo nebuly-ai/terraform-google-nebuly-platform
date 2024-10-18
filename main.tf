@@ -282,6 +282,15 @@ resource "google_container_node_pool" "main" {
 
     labels = each.value.labels
 
+    dynamic "taint" {
+      for_each = each.value.taints == null ? [] : each.value.taints
+      content {
+        key    = taint.value.key
+        value  = taint.value.value
+        effect = taint.value.effect
+      }
+    }
+
     dynamic "guest_accelerator" {
       for_each = each.value.guest_accelerator == null ? {} : { "" : each.value.guest_accelerator }
       content {
