@@ -294,6 +294,13 @@ resource "google_container_node_pool" "main" {
       }
     }
   }
+
+
+  lifecycle {
+    ignore_changes = [
+      node_config[0].kubelet_config,
+    ]
+  }
 }
 resource "google_project_iam_member" "gke_secret_accessors" {
   for_each = var.gke_nebuly_namespaces
