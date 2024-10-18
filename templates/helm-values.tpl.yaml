@@ -113,11 +113,6 @@ lionLinguist:
     storageClassName: standard
     accessModes:
       - ReadWriteOnce
-
-  resources:
-    limits:
-      memory: 4Gi
-
   volumeMounts:
     - name: secrets-store
       mountPath: /mnt/secrets-store
