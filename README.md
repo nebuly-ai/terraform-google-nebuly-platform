@@ -202,7 +202,7 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_postgres_server_edition"></a> [postgres\_server\_edition](#input\_postgres\_server\_edition) | The edition of the PostgreSQL server. Possible values are ENTERPRISE, ENTERPRISE\_PLUS. | `string` | `"ENTERPRISE"` | no |
 | <a name="input_postgres_server_high_availability"></a> [postgres\_server\_high\_availability](#input\_postgres\_server\_high\_availability) | The high availability configuration for the PostgreSQL server. | <pre>object({<br/>    enabled : bool<br/>  })</pre> | <pre>{<br/>  "enabled": true<br/>}</pre> | no |
 | <a name="input_postgres_server_maintenance_window"></a> [postgres\_server\_maintenance\_window](#input\_postgres\_server\_maintenance\_window) | Time window when the PostgreSQL server can automatically restart to apply updates. Specified in UTC time. | <pre>object({<br/>    day : string<br/>    hour : number<br/>  })</pre> | <pre>{<br/>  "day": "6",<br/>  "hour": 23<br/>}</pre> | no |
-| <a name="input_postgres_server_tier"></a> [postgres\_server\_tier](#input\_postgres\_server\_tier) | The tier of the PostgreSQL server. Default value: 4 vCPU, 16GB memory. | `string` | `"db-custom-4-15360"` | no |
+| <a name="input_postgres_server_tier"></a> [postgres\_server\_tier](#input\_postgres\_server\_tier) | The tier of the PostgreSQL server. Default value: 4 vCPU, 16GB memory. | `string` | `"db-standard-4"` | no |
 | <a name="input_region"></a> [region](#input\_region) | The region where the resources will be created | `string` | n/a | yes |
 | <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | The prefix that is used for generating resource names. | `string` | n/a | yes |
 

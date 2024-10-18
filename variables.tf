@@ -56,7 +56,7 @@ variable "network_cidr_blocks" {
 variable "postgres_server_tier" {
   description = "The tier of the PostgreSQL server. Default value: 4 vCPU, 16GB memory."
   type        = string
-  default     = "db-custom-4-15360"
+  default     = "db-standard-4"
 }
 variable "postgres_server_delete_protection" {
   description = "Whether the PostgreSQL server should have delete protection enabled."
