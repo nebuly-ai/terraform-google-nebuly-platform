@@ -435,8 +435,8 @@ locals {
       platform_domain        = var.platform_domain
       image_pull_secret_name = var.k8s_image_pull_secret_name
 
-      openai_endpoint               = var.openai_endpoint
-      openai_frustration_deployment = var.openai_gpt4_deployment_name
+      openai_endpoint         = var.openai_endpoint
+      openai_gpt4o_deployment = var.openai_gpt4_deployment_name
 
       secret_provider_class_name        = local.secret_provider_class_name
       secret_provider_class_secret_name = local.secret_provider_class_secret_name
