@@ -76,9 +76,6 @@ eventIngestion:
         hosts:
           - ${platform_domain}
 
-azureml:
-  enabled: false
-
 aiModels:
   registry: "gcp_bucket"
   gcp:
