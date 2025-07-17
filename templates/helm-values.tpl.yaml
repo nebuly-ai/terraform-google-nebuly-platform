@@ -101,43 +101,6 @@ aiModels:
         mountPath: /mnt/secrets-store
         readOnly: true
 
-lionLinguist:
-  image:
-    repository: "ghcr.io/nebuly-ai/nebuly-lion-linguist"
-
-  modelsCache:
-    enabled: true
-    storageClassName: standard
-    accessModes:
-      - ReadWriteOnce
-  volumeMounts:
-    - name: secrets-store
-      mountPath: /mnt/secrets-store
-      readOnly: true
-  volumes:
-    - name: secrets-store
-      csi:
-        driver: secrets-store.csi.k8s.io
-        readOnly: true
-        volumeAttributes:
-          secretProviderClass: ${secret_provider_class_name}
-
-ingestionWorker:
-  image:
-    repository: "ghcr.io/nebuly-ai/nebuly-ingestion-worker"
-
-  volumeMounts:
-    - name: secrets-store
-      mountPath: /mnt/secrets-store
-      readOnly: true
-  volumes:
-    - name: secrets-store
-      csi:
-        driver: secrets-store.csi.k8s.io
-        readOnly: true
-        volumeAttributes:
-          secretProviderClass: ${secret_provider_class_name}
-
 primaryProcessing:
   schedule: "0 23 * * *" # Every day at 11:00 PM, cluster's timezone
   resources:
@@ -267,6 +230,7 @@ frontend:
 openAi:
   enabled: true
   gpt4oDeployment: ${openai_gpt4o_deployment}
+  translationDeployment: ${openai_translation_deployment}
   endpoint: ${openai_endpoint}
 
   existingSecret:

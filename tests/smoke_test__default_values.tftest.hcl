@@ -18,7 +18,8 @@ run "smoke_test_plan" {
 
     openai_api_key              = "test"
     openai_endpoint             = "https://test.nebuly.com"
-    openai_gpt4_deployment_name = "test"
+    openai_gpt4o_deployment_name = "gpt-4o"
+    openai_translation_deployment_name = "gpt-4o-mini"
 
     gke_cluster_admin_users = []
 

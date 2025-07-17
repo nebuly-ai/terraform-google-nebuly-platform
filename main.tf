@@ -279,6 +279,8 @@ resource "google_container_node_pool" "main" {
     machine_type = each.value.machine_type
 
     service_account = google_service_account.gke_node_pool.email
+    disk_type       = each.value.disk_type
+    disk_size_gb    = each.value.disk_size_gb
 
     labels = each.value.labels
 
@@ -435,8 +437,9 @@ locals {
       platform_domain        = var.platform_domain
       image_pull_secret_name = var.k8s_image_pull_secret_name
 
-      openai_endpoint         = var.openai_endpoint
-      openai_gpt4o_deployment = var.openai_gpt4_deployment_name
+      openai_endpoint               = var.openai_endpoint
+      openai_gpt4o_deployment       = var.openai_gpt4o_deployment_name
+      openai_translation_deployment = var.openai_translation_deployment_name
 
       secret_provider_class_name        = local.secret_provider_class_name
       secret_provider_class_secret_name = local.secret_provider_class_secret_name

@@ -24,8 +24,15 @@ variable "openai_endpoint" {
   description = "The endpoint of the OpenAI API."
   type        = string
 }
-variable "openai_gpt4_deployment_name" {
-  description = "The name of the deployment to use for the GPT-4 model."
+variable "openai_gpt4o_deployment_name" {
+  description = "The name of the deployment to use for the GPT-4o model."
+  type        = string
+}
+variable "openai_translation_deployment_name" {
+  description = <<EOT
+  The name of the deployment to use for enabling the translations feature. Recommended to use `gpt-4o-mini`.
+  Provide an empty string to disable the translations feature.
+  EOT
   type        = string
 }
 
@@ -152,6 +159,8 @@ variable "gke_node_pools" {
     min_nodes      = number
     max_nodes      = number
     node_count     = number
+    disk_type      = optional(string, "pd-balanced")
+    disk_size_gb   = optional(number, 128)
     node_locations = optional(set(string), null)
     preemptible    = optional(bool, false)
     labels         = optional(map(string), {})
@@ -167,7 +176,7 @@ variable "gke_node_pools" {
   }))
   default = {
     "web-services" : {
-      machine_type = "n4-highmem-4"
+      machine_type = "n2-highmem-4"
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1
