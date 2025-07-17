@@ -161,25 +161,6 @@ primaryProcessing:
       key: nvidia.com/gpu
       operator: Exists
 
-secondaryProcessing:
-  schedule: "0 2 * * *" # Every day at 2:00 AM, cluster's timezone
-
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: nebuly.com/accelerator
-                operator: In
-                values:
-                  - nvidia-l4
-
-  tolerations:
-    - effect: NoSchedule
-      key: nvidia.com/gpu
-      operator: Exists
-
-
 kafka:
   external: false
   zookeeper:

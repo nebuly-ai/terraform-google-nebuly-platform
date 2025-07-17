@@ -131,7 +131,7 @@ variable "gke_service_account_name" {
 variable "gke_kubernetes_version" {
   description = "The used Kubernetes version for the GKE cluster."
   type        = string
-  default     = "1.30.3"
+  default     = "1.32.4"
 }
 variable "gke_delete_protection" {
   description = "Whether the GKE Cluster should have delete protection enabled."
@@ -184,20 +184,6 @@ variable "gke_node_pools" {
       labels = {
         "gke-no-default-nvidia-gpu-device-plugin" : true,
         "nebuly.com/accelerator" : "nvidia-l4",
-      }
-    }
-    "gpu-secondary" : {
-      machine_type = "n1-standard-4"
-      min_nodes    = 0
-      max_nodes    = 1
-      node_count   = null
-      guest_accelerator = {
-        type  = "nvidia-tesla-t4"
-        count = 1
-      }
-      labels = {
-        "gke-no-default-nvidia-gpu-device-plugin" : true,
-        "nebuly.com/accelerator" : "nvidia-tesla-t4",
       }
     }
   }
