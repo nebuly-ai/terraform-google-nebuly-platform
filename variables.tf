@@ -155,15 +155,16 @@ variable "gke_node_pools" {
   The node Pools used by the GKE cluster.
   EOT
   type = map(object({
-    machine_type   = string
-    min_nodes      = number
-    max_nodes      = number
-    node_count     = number
-    disk_type      = optional(string, "pd-balanced")
-    disk_size_gb   = optional(number, 128)
-    node_locations = optional(set(string), null)
-    preemptible    = optional(bool, false)
-    labels         = optional(map(string), {})
+    machine_type    = string
+    min_nodes       = number
+    max_nodes       = number
+    node_count      = number
+    resource_labels = optional(map(string), {})
+    disk_type       = optional(string, "pd-balanced")
+    disk_size_gb    = optional(number, 128)
+    node_locations  = optional(set(string), null)
+    preemptible     = optional(bool, false)
+    labels          = optional(map(string), {})
     taints = optional(set(object({
       key    = string
       value  = string
@@ -180,6 +181,9 @@ variable "gke_node_pools" {
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1
+      resource_labels = {
+        "goog-gke-node-pool-provisioning-model" = "on-demand"
+      }
     }
     "gpu-primary" : {
       machine_type = "g2-standard-8"
@@ -193,6 +197,10 @@ variable "gke_node_pools" {
       labels = {
         "gke-no-default-nvidia-gpu-device-plugin" : true,
         "nebuly.com/accelerator" : "nvidia-l4",
+      }
+      resource_labels = {
+        "goog-gke-accelerator-type"             = "nvidia-l4"
+        "goog-gke-node-pool-provisioning-model" = "on-demand"
       }
     }
   }

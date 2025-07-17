@@ -282,7 +282,8 @@ resource "google_container_node_pool" "main" {
     disk_type       = each.value.disk_type
     disk_size_gb    = each.value.disk_size_gb
 
-    labels = each.value.labels
+    labels          = each.value.labels
+    resource_labels = each.value.resource_labels
 
     dynamic "taint" {
       for_each = each.value.taints == null ? [] : each.value.taints
