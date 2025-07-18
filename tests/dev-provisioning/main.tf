@@ -21,6 +21,14 @@ provider "google" {
 variable "region" {
   type = string
 }
+variable "microsoft_sso" {
+  type = object({
+    tenant_id     = string
+    client_id     = string
+    client_secret = string
+  })
+  default = null
+}
 variable "nebuly_credentials" {
   type = object({
     client_id     = string
@@ -51,6 +59,8 @@ module "platform" {
   openai_endpoint                    = "https://api.openai.com"
   openai_gpt4o_deployment_name       = "gpt-4o"
   openai_translation_deployment_name = "gpt-4o-mini"
+
+  microsoft_sso = var.microsoft_sso
 
   platform_domain    = "platform.gcp.testing.nebuly.com"
   nebuly_credentials = var.nebuly_credentials

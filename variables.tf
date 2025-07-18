@@ -246,3 +246,14 @@ variable "k8s_image_pull_secret_name" {
   type        = string
   default     = "nebuly-docker-pull"
 }
+variable "microsoft_sso" {
+  description = "Settings for configuring the Microsoft Entra SSO integration."
+  type = object({
+    tenant_id : string
+    client_id : string
+    client_secret : string
+  })
+  default = null
+}
+
+

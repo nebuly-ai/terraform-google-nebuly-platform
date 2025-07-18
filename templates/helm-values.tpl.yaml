@@ -163,11 +163,24 @@ auth:
     postgresPasswordKey: ${k8s_secret_key_auth_db_password}
     jwtSigningKey: ${k8s_secret_key_jwt_signing_key}
 
+  %{ if microsoft_sso_enabled }
+  loginModes: "microsoft"
+  %{ else }
   loginModes: "password"
+  %{ endif }
 
-  # TODO: optional Microsoft SSO
+  # Optional Microsoft SSO
+  %{ if microsoft_sso_enabled }
   microsoft:
-    enabled: false
+    enabled: ${microsoft_sso_enabled}
+    tenantId: ${microsoft_sso_tenant_id}
+    redirectUri: https://${platform_domain}/backend/auth/oauth/microsoft/callback
+    existingSecret:
+      name: ${secret_provider_class_secret_name}
+      clientIdKey: ${k8s_secret_key_microsoft_sso_client_id}
+      clientSecretKey: ${k8s_secret_key_microsoft_sso_client_secret}
+  %{ endif }
+
 
   volumeMounts:
     - name: secrets-store

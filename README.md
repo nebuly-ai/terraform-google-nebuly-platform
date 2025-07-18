@@ -189,6 +189,7 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_gke_service_account_name"></a> [gke\_service\_account\_name](#input\_gke\_service\_account\_name) | The name of the Kubernetes Service Account used by Nebuly installation. | `string` | `"nebuly"` | no |
 | <a name="input_k8s_image_pull_secret_name"></a> [k8s\_image\_pull\_secret\_name](#input\_k8s\_image\_pull\_secret\_name) | The name of the Kubernetes Image Pull Secret to use. <br/>  This value will be used to auto-generate the values.yaml file for installing the Nebuly Platform Helm chart. | `string` | `"nebuly-docker-pull"` | no |
 | <a name="input_labels"></a> [labels](#input\_labels) | Common labels that will be applied to all resources. | `map(string)` | `{}` | no |
+| <a name="input_microsoft_sso"></a> [microsoft\_sso](#input\_microsoft\_sso) | Settings for configuring the Microsoft Entra SSO integration. | <pre>object({<br/>    tenant_id : string<br/>    client_id : string<br/>    client_secret : string<br/>  })</pre> | `null` | no |
 | <a name="input_nebuly_credentials"></a> [nebuly\_credentials](#input\_nebuly\_credentials) | The credentials provided by Nebuly are required for activating your platform installation. <br/>  If you haven't received your credentials or have lost them, please contact support@nebuly.ai. | <pre>object({<br/>    client_id : string<br/>    client_secret : string<br/>  })</pre> | n/a | yes |
 | <a name="input_network_cidr_blocks"></a> [network\_cidr\_blocks](#input\_network\_cidr\_blocks) | The CIDR blocks of the VPC network used by Nebuly.<br/><br/>  - primary: The primary CIDR block of the VPC network.<br/>  - secondary\_gke\_pods: The secondary CIDR block used by GKE for pods.<br/>  - secondary\_gke\_services: The secondary CIDR block used by GKE for services. | <pre>object({<br/>    primary : string<br/>    secondary_gke_pods : string<br/>    secondary_gke_services : string<br/>  })</pre> | <pre>{<br/>  "primary": "10.0.0.0/16",<br/>  "secondary_gke_pods": "10.4.0.0/16",<br/>  "secondary_gke_services": "10.6.0.0/16"<br/>}</pre> | no |
 | <a name="input_openai_api_key"></a> [openai\_api\_key](#input\_openai\_api\_key) | The API Key used for authenticating with OpenAI. | `string` | n/a | yes |
@@ -218,17 +219,21 @@ You can find examples of code that uses this Terraform module in the [examples](
 - resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#340)
 - resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#317)
 - resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#357)
-- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#384)
-- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#396)
-- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#372)
+- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#409)
+- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#425)
+- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#383)
+- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#395)
+- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#371)
 - resource.google_secret_manager_secret.postgres_analytics_password (/terraform-docs/main.tf#150)
 - resource.google_secret_manager_secret.postgres_analytics_username (/terraform-docs/main.tf#138)
 - resource.google_secret_manager_secret.postgres_auth_password (/terraform-docs/main.tf#191)
 - resource.google_secret_manager_secret.postgres_auth_username (/terraform-docs/main.tf#179)
 - resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#365)
-- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#392)
-- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#404)
-- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#380)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#419)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#435)
+- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#391)
+- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#403)
+- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#379)
 - resource.google_secret_manager_secret_version.postgres_analytics_password (/terraform-docs/main.tf#158)
 - resource.google_secret_manager_secret_version.postgres_analytics_username (/terraform-docs/main.tf#146)
 - resource.google_secret_manager_secret_version.postgres_auth_password (/terraform-docs/main.tf#199)
@@ -240,7 +245,7 @@ You can find examples of code that uses this Terraform module in the [examples](
 - resource.google_sql_database_instance.main (/terraform-docs/main.tf#82)
 - resource.google_sql_user.analytics (/terraform-docs/main.tf#133)
 - resource.google_sql_user.auth (/terraform-docs/main.tf#174)
-- resource.google_storage_bucket.main (/terraform-docs/main.tf#410)
+- resource.google_storage_bucket.main (/terraform-docs/main.tf#444)
 - resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#328)
 - resource.random_password.analytics (/terraform-docs/main.tf#128)
 - resource.random_password.auth (/terraform-docs/main.tf#169)

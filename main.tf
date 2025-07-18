@@ -367,7 +367,6 @@ resource "google_secret_manager_secret_version" "jwt_signing_key" {
   secret_data = tls_private_key.jwt_signing_key.private_key_pem
 }
 
-
 # ------ External Credentials ------ #
 resource "google_secret_manager_secret" "openai_api_key" {
   secret_id = "${var.resource_prefix}openai-api-key"
@@ -406,6 +405,41 @@ resource "google_secret_manager_secret_version" "nebuly_client_secret" {
   secret_data = var.nebuly_credentials.client_secret
 }
 
+# Microsoft SSO
+resource "google_secret_manager_secret" "microsoft_sso_client_id" {
+  count = var.microsoft_sso != null ? 1 : 0
+
+  secret_id = "${var.resource_prefix}microsoft-sso-client-id"
+  labels    = var.labels
+
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "microsoft_sso_client_id" {
+  count = var.microsoft_sso != null ? 1 : 0
+
+  secret      = google_secret_manager_secret.microsoft_sso_client_id[0].id
+  secret_data = var.microsoft_sso.client_id
+}
+resource "google_secret_manager_secret" "microsoft_sso_client_secret" {
+  count = var.microsoft_sso != null ? 1 : 0
+
+  secret_id = "${var.resource_prefix}microsoft-sso-client-secret"
+  labels    = var.labels
+
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "microsoft_sso_client_secret" {
+  count = var.microsoft_sso != null ? 1 : 0
+
+  secret      = google_secret_manager_secret.microsoft_sso_client_secret[0].id
+  secret_data = var.microsoft_sso.client_secret
+}
+
+
 # ------ Storage ------ #
 resource "google_storage_bucket" "main" {
   name                        = "${var.resource_prefix}nebuly"
@@ -423,14 +457,16 @@ locals {
   secret_provider_class_secret_name = "nebuly-platform-credentials"
 
   # k8s secrets keys
-  k8s_secret_key_analytics_db_username = "analytics-db-username"
-  k8s_secret_key_analytics_db_password = "analytics-db-password"
-  k8s_secret_key_auth_db_username      = "auth-db-username"
-  k8s_secret_key_auth_db_password      = "auth-db-password"
-  k8s_secret_key_jwt_signing_key       = "jwt-signing-key"
-  k8s_secret_key_openai_api_key        = "openai-api-key"
-  k8s_secret_key_nebuly_client_id      = "nebuly-azure-client-id"
-  k8s_secret_key_nebuly_client_secret  = "nebuly-azure-client-secret"
+  k8s_secret_key_analytics_db_username       = "analytics-db-username"
+  k8s_secret_key_analytics_db_password       = "analytics-db-password"
+  k8s_secret_key_auth_db_username            = "auth-db-username"
+  k8s_secret_key_auth_db_password            = "auth-db-password"
+  k8s_secret_key_jwt_signing_key             = "jwt-signing-key"
+  k8s_secret_key_openai_api_key              = "openai-api-key"
+  k8s_secret_key_nebuly_client_id            = "nebuly-azure-client-id"
+  k8s_secret_key_nebuly_client_secret        = "nebuly-azure-client-secret"
+  k8s_secret_key_microsoft_sso_client_id     = "microsoft-sso-client-id"
+  k8s_secret_key_microsoft_sso_client_secret = "microsoft-sso-client-secret"
 
   helm_values = templatefile(
     "${path.module}/templates/helm-values.tpl.yaml",
@@ -449,6 +485,11 @@ locals {
       k8s_secret_key_analytics_db_password = local.k8s_secret_key_analytics_db_password
       k8s_secret_key_auth_db_username      = local.k8s_secret_key_auth_db_username
       k8s_secret_key_auth_db_password      = local.k8s_secret_key_auth_db_password
+
+      microsoft_sso_enabled                      = var.microsoft_sso != null
+      microsoft_sso_tenant_id                    = var.microsoft_sso != null ? var.microsoft_sso.tenant_id : ""
+      k8s_secret_key_microsoft_sso_client_id     = local.k8s_secret_key_microsoft_sso_client_id
+      k8s_secret_key_microsoft_sso_client_secret = local.k8s_secret_key_microsoft_sso_client_secret
 
       k8s_secret_key_jwt_signing_key      = local.k8s_secret_key_jwt_signing_key
       k8s_secret_key_openai_api_key       = local.k8s_secret_key_openai_api_key
@@ -470,15 +511,21 @@ locals {
       secret_provider_class_name        = local.secret_provider_class_name
       secret_provider_class_secret_name = local.secret_provider_class_secret_name
 
-      secret_name_jwt_signing_key       = google_secret_manager_secret_version.jwt_signing_key.name
-      secret_name_auth_db_username      = google_secret_manager_secret_version.postgres_auth_username.name
-      secret_name_auth_db_password      = google_secret_manager_secret_version.postgres_auth_password.name
-      secret_name_analytics_db_username = google_secret_manager_secret_version.postgres_analytics_username.name
-      secret_name_analytics_db_password = google_secret_manager_secret_version.postgres_analytics_password.name
-      secret_name_openai_api_key        = google_secret_manager_secret_version.openai_api_key.name
+      secret_name_jwt_signing_key             = google_secret_manager_secret_version.jwt_signing_key.name
+      secret_name_auth_db_username            = google_secret_manager_secret_version.postgres_auth_username.name
+      secret_name_auth_db_password            = google_secret_manager_secret_version.postgres_auth_password.name
+      secret_name_analytics_db_username       = google_secret_manager_secret_version.postgres_analytics_username.name
+      secret_name_analytics_db_password       = google_secret_manager_secret_version.postgres_analytics_password.name
+      secret_name_openai_api_key              = google_secret_manager_secret_version.openai_api_key.name
+      secret_name_microsoft_sso_client_id     = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_id[0].name
+      secret_name_microsoft_sso_client_secret = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_secret[0].name
 
       secret_name_nebuly_client_id     = google_secret_manager_secret_version.nebuly_client_id.name
       secret_name_nebuly_client_secret = google_secret_manager_secret_version.nebuly_client_secret.name
+
+      microsoft_sso_enabled                      = var.microsoft_sso != null
+      k8s_secret_key_microsoft_sso_client_id     = local.k8s_secret_key_microsoft_sso_client_id
+      k8s_secret_key_microsoft_sso_client_secret = local.k8s_secret_key_microsoft_sso_client_secret
 
       k8s_secret_key_auth_db_username      = local.k8s_secret_key_auth_db_username
       k8s_secret_key_auth_db_password      = local.k8s_secret_key_auth_db_password
