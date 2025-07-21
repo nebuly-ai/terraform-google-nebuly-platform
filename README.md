@@ -33,9 +33,6 @@ Ensure that your GCP project has the necessary quotas for the following resource
 - **Name**: NVIDIA L4 GPUs 
   
   **Min Value**: 1
-- **Name**: NVIDIA T4 GPUs 
-  
-  **Min Value**: 1
 
 For more information on how to check and increase quotas, refer to the [GCP Documentation](https://cloud.google.com/docs/quotas/view-manage).
   
