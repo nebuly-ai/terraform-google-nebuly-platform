@@ -30,7 +30,7 @@ module "nebuly" {
   version = "~0.1.0"
 
   region          = var.region
-  resource_prefix = "dev-"
+  resource_prefix = "nbldev"
 
   gke_cluster_admin_users = [
     "your-user@email.com",

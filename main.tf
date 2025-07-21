@@ -136,7 +136,7 @@ resource "google_sql_user" "analytics" {
   password = random_password.analytics.result
 }
 resource "google_secret_manager_secret" "postgres_analytics_username" {
-  secret_id = "${var.resource_prefix}postgres-analytics-username"
+  secret_id = "${var.resource_prefix}-postgres-analytics-username"
   labels    = var.labels
 
   replication {
@@ -148,7 +148,7 @@ resource "google_secret_manager_secret_version" "postgres_analytics_username" {
   secret_data = google_sql_user.analytics.name
 }
 resource "google_secret_manager_secret" "postgres_analytics_password" {
-  secret_id = "${var.resource_prefix}postgres-analytics-password"
+  secret_id = "${var.resource_prefix}-postgres-analytics-password"
   labels    = var.labels
 
   replication {
@@ -177,7 +177,7 @@ resource "google_sql_user" "auth" {
   password = random_password.auth.result
 }
 resource "google_secret_manager_secret" "postgres_auth_username" {
-  secret_id = "${var.resource_prefix}postgres-auth-username"
+  secret_id = "${var.resource_prefix}-postgres-auth-username"
   labels    = var.labels
 
   replication {
@@ -189,7 +189,7 @@ resource "google_secret_manager_secret_version" "postgres_auth_username" {
   secret_data = google_sql_user.auth.name
 }
 resource "google_secret_manager_secret" "postgres_auth_password" {
-  secret_id = "${var.resource_prefix}postgres-auth-password"
+  secret_id = "${var.resource_prefix}-postgres-auth-password"
   labels    = var.labels
 
   replication {
@@ -355,7 +355,7 @@ resource "tls_private_key" "jwt_signing_key" {
   rsa_bits  = 4096
 }
 resource "google_secret_manager_secret" "jwt_signing_key" {
-  secret_id = "${var.resource_prefix}jwt-signing-key"
+  secret_id = "${var.resource_prefix}-jwt-signing-key"
   labels    = var.labels
 
   replication {
@@ -369,7 +369,7 @@ resource "google_secret_manager_secret_version" "jwt_signing_key" {
 
 # ------ External Credentials ------ #
 resource "google_secret_manager_secret" "openai_api_key" {
-  secret_id = "${var.resource_prefix}openai-api-key"
+  secret_id = "${var.resource_prefix}-openai-api-key"
   labels    = var.labels
 
   replication {
@@ -381,7 +381,7 @@ resource "google_secret_manager_secret_version" "openai_api_key" {
   secret_data = var.openai_api_key
 }
 resource "google_secret_manager_secret" "nebuly_client_id" {
-  secret_id = "${var.resource_prefix}nebuly-client-id"
+  secret_id = "${var.resource_prefix}-nebuly-client-id"
   labels    = var.labels
 
   replication {
@@ -393,7 +393,7 @@ resource "google_secret_manager_secret_version" "nebuly_client_id" {
   secret_data = var.nebuly_credentials.client_id
 }
 resource "google_secret_manager_secret" "nebuly_client_secret" {
-  secret_id = "${var.resource_prefix}nebuly-client-secret"
+  secret_id = "${var.resource_prefix}-nebuly-client-secret"
   labels    = var.labels
 
   replication {
@@ -409,7 +409,7 @@ resource "google_secret_manager_secret_version" "nebuly_client_secret" {
 resource "google_secret_manager_secret" "microsoft_sso_client_id" {
   count = var.microsoft_sso != null ? 1 : 0
 
-  secret_id = "${var.resource_prefix}microsoft-sso-client-id"
+  secret_id = "${var.resource_prefix}-microsoft-sso-client-id"
   labels    = var.labels
 
   replication {
@@ -425,7 +425,7 @@ resource "google_secret_manager_secret_version" "microsoft_sso_client_id" {
 resource "google_secret_manager_secret" "microsoft_sso_client_secret" {
   count = var.microsoft_sso != null ? 1 : 0
 
-  secret_id = "${var.resource_prefix}microsoft-sso-client-secret"
+  secret_id = "${var.resource_prefix}-microsoft-sso-client-secret"
   labels    = var.labels
 
   replication {
