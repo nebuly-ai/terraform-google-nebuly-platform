@@ -110,9 +110,8 @@ content: |-
   Refer to the [chart documentation](https://github.com/nebuly-ai/helm-charts/tree/main/bootstrap-gcp) for all the configuration details.
 
   ```shell
-  helm install oci://ghcr.io/nebuly-ai/helm-charts/bootstrap-gcp \
+  helm install nebuly-bootstrap oci://ghcr.io/nebuly-ai/helm-charts/bootstrap-gcp \
     --namespace nebuly-bootstrap \
-    --generate-name \
     --create-namespace 
   ```
 
@@ -150,7 +149,7 @@ content: |-
   helm install <your-release-name> oci://ghcr.io/nebuly-ai/helm-charts/nebuly-platform \
     --namespace nebuly \
     -f values.yaml \
-    --timeout 30m 
+    --timeout 45m 
   ```
 
   > ℹ️  During the initial installation of the chart, all required Nebuly LLMs are uploaded to your model registry. 

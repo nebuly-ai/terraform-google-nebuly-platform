@@ -1,7 +1,81 @@
-# Basic usage
+# Microsoft Entra SSO Example
 
-This example shows a basic usage of the Nebuly's platform GCP Terraform module.
+Nebuly supports several authentication methods.
+This example shows how to use [Microsoft Entra SSO](https://www.microsoft.com/en-us/security/business/identity-access/microsoft-entra-single-sign-on) to authenticate users.
 
+## Prerequisites
+
+### Step 1: Register a Microsoft Entra Application
+
+1. Sign in to the [Azure Portal](https://portal.azure.com/).
+2. In the left-hand menu, select **Microsoft Entra ID**.
+3. Under the **Manage** section, click **App registrations** > **New registration**.
+4. Fill out the registration form:
+   - **Name**: Choose a meaningful name (e.g., `Nebuly SSO`).
+   - **Redirect URI**:
+     - Choose **Web** as the platform.
+     - `https://<platform_domain>/backend/auth/oauth/microsoft/callback`, where `<platform_domain>` is
+       the value you provided for the Terraform variable `platform_domain`.
+5. Click **Register**.
+6. After registration, go to **Certificates & secrets** from the sidebar.
+7. Click **+ New client secret** and configure:
+   - **Description**: `Nebuly OAuth2`
+   - **Expires**: `24 months`
+8. Save and securely store the following values:
+   - **Application (client) ID**
+   - **Client secret (value)**
+
+### Step 2: Define Application Roles
+
+1. Open the Entra Application you created.
+2. From the sidebar, go to **App roles**.
+3. Click **+ Create app role** and define the following roles:
+
+- **Role: Viewer**
+  - **Display name**: `Viewer`
+  - **Allowed member types**: `Users/Groups`
+  - **Value**: `viewer`
+  - **Description**: `Users with read-only access to Nebuly`
+
+- **Role: Member**
+  - **Display name**: `Member`
+  - **Allowed member types**: `Users/Groups`
+  - **Value**: `member`
+  - **Description**: `Users with standard access to Nebuly`
+
+- **Role: Admin**
+  - **Display name**: `Admin`
+  - **Allowed member types**: `Users/Groups`
+  - **Value**: `admin`
+  - **Description**: `Users with admin access to Nebuly`
+
+### Step 3: Assign Users or Groups to Roles
+
+To grant access to the Nebuly platform:
+
+1. In the Azure Portal, go to **Microsoft Entra ID** > **Enterprise applications**.
+2. Select the application you created.
+3. In the left-hand menu, click **Properties**
+   - Set **Assignment required?** to **Yes**
+4. In the left-hand menu, click **Users and groups**.
+5. Click **+ Add user/group**.
+6. Select users or groups, and assign them to one of the roles you created (`Viewer`, `Member`, or `Admin`).
+7. Confirm and save your changes.
+
+## Terraform configuration
+
+To enable Microsoft Entra SSO authentication in Nebuly, you need to provide the following Terraform variables:
+
+```hcl
+microsoft_sso = {
+    client_id     = "<your-app-client-id>"
+    client_secret = "<your-app-client-secret>"
+    issuer        = "<your-microsoft-tenant-id>"
+}
+```
+
+The Terraform module will automatically generate the reuired Helm values and secret provider class
+for the Microsoft Entra SSO integration.
 
 ## Platform installation
 

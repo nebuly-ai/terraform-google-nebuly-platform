@@ -43,6 +43,12 @@ module "nebuly" {
     client_id     = "<your-nebuly-client-id>"
     client_secret = "<your-nebuly-client-secret>"
   }
+
+  microsoft_sso = {
+    client_id     = "<your-microsoft-client-id>"
+    client_secret = "<your-microsoft-client-secret>"
+    tenant_id     = "<your-microsoft-tenant-id>"
+  }
 }
 
 
