@@ -21,6 +21,14 @@ run "smoke_test_plan" {
     openai_gpt4o_deployment_name = "gpt-4o"
     openai_translation_deployment_name = "gpt-4o-mini"
 
+
+    # ------ Microsoft SSO ------ #
+    microsoft_sso_credentials = {
+      tenant_id : "my-tenant-id"
+      client_id : "my-client-id"
+      client_secret : "my-client-secret"
+    }
+
     gke_cluster_admin_users = []
 
     nebuly_credentials = {

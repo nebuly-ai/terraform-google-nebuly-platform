@@ -24,8 +24,15 @@ variable "openai_endpoint" {
   description = "The endpoint of the OpenAI API."
   type        = string
 }
-variable "openai_gpt4_deployment_name" {
-  description = "The name of the deployment to use for the GPT-4 model."
+variable "openai_gpt4o_deployment_name" {
+  description = "The name of the deployment to use for the GPT-4o model."
+  type        = string
+}
+variable "openai_translation_deployment_name" {
+  description = <<EOT
+  The name of the deployment to use for enabling the translations feature. Recommended to use `gpt-4o-mini`.
+  Provide an empty string to disable the translations feature.
+  EOT
   type        = string
 }
 
@@ -131,7 +138,7 @@ variable "gke_service_account_name" {
 variable "gke_kubernetes_version" {
   description = "The used Kubernetes version for the GKE cluster."
   type        = string
-  default     = "1.30.3"
+  default     = "1.32.4"
 }
 variable "gke_delete_protection" {
   description = "Whether the GKE Cluster should have delete protection enabled."
@@ -148,13 +155,16 @@ variable "gke_node_pools" {
   The node Pools used by the GKE cluster.
   EOT
   type = map(object({
-    machine_type   = string
-    min_nodes      = number
-    max_nodes      = number
-    node_count     = number
-    node_locations = optional(set(string), null)
-    preemptible    = optional(bool, false)
-    labels         = optional(map(string), {})
+    machine_type    = string
+    min_nodes       = number
+    max_nodes       = number
+    node_count      = number
+    resource_labels = optional(map(string), {})
+    disk_type       = optional(string, "pd-balanced")
+    disk_size_gb    = optional(number, 128)
+    node_locations  = optional(set(string), null)
+    preemptible     = optional(bool, false)
+    labels          = optional(map(string), {})
     taints = optional(set(object({
       key    = string
       value  = string
@@ -167,10 +177,13 @@ variable "gke_node_pools" {
   }))
   default = {
     "web-services" : {
-      machine_type = "n4-highmem-4"
+      machine_type = "n2-highmem-4"
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1
+      resource_labels = {
+        "goog-gke-node-pool-provisioning-model" = "on-demand"
+      }
     }
     "gpu-primary" : {
       machine_type = "g2-standard-8"
@@ -185,19 +198,9 @@ variable "gke_node_pools" {
         "gke-no-default-nvidia-gpu-device-plugin" : true,
         "nebuly.com/accelerator" : "nvidia-l4",
       }
-    }
-    "gpu-secondary" : {
-      machine_type = "n1-standard-4"
-      min_nodes    = 0
-      max_nodes    = 1
-      node_count   = null
-      guest_accelerator = {
-        type  = "nvidia-tesla-t4"
-        count = 1
-      }
-      labels = {
-        "gke-no-default-nvidia-gpu-device-plugin" : true,
-        "nebuly.com/accelerator" : "nvidia-tesla-t4",
+      resource_labels = {
+        "goog-gke-accelerator-type"             = "nvidia-l4"
+        "goog-gke-node-pool-provisioning-model" = "on-demand"
       }
     }
   }
@@ -243,3 +246,14 @@ variable "k8s_image_pull_secret_name" {
   type        = string
   default     = "nebuly-docker-pull"
 }
+variable "microsoft_sso" {
+  description = "Settings for configuring the Microsoft Entra SSO integration."
+  type = object({
+    tenant_id : string
+    client_id : string
+    client_secret : string
+  })
+  default = null
+}
+
+

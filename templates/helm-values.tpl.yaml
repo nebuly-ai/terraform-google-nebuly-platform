@@ -101,43 +101,6 @@ aiModels:
         mountPath: /mnt/secrets-store
         readOnly: true
 
-lionLinguist:
-  image:
-    repository: "ghcr.io/nebuly-ai/nebuly-lion-linguist"
-
-  modelsCache:
-    enabled: true
-    storageClassName: standard
-    accessModes:
-      - ReadWriteOnce
-  volumeMounts:
-    - name: secrets-store
-      mountPath: /mnt/secrets-store
-      readOnly: true
-  volumes:
-    - name: secrets-store
-      csi:
-        driver: secrets-store.csi.k8s.io
-        readOnly: true
-        volumeAttributes:
-          secretProviderClass: ${secret_provider_class_name}
-
-ingestionWorker:
-  image:
-    repository: "ghcr.io/nebuly-ai/nebuly-ingestion-worker"
-
-  volumeMounts:
-    - name: secrets-store
-      mountPath: /mnt/secrets-store
-      readOnly: true
-  volumes:
-    - name: secrets-store
-      csi:
-        driver: secrets-store.csi.k8s.io
-        readOnly: true
-        volumeAttributes:
-          secretProviderClass: ${secret_provider_class_name}
-
 primaryProcessing:
   schedule: "0 23 * * *" # Every day at 11:00 PM, cluster's timezone
   resources:
@@ -160,25 +123,6 @@ primaryProcessing:
     - effect: NoSchedule
       key: nvidia.com/gpu
       operator: Exists
-
-secondaryProcessing:
-  schedule: "0 2 * * *" # Every day at 2:00 AM, cluster's timezone
-
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: nebuly.com/accelerator
-                operator: In
-                values:
-                  - nvidia-l4
-
-  tolerations:
-    - effect: NoSchedule
-      key: nvidia.com/gpu
-      operator: Exists
-
 
 kafka:
   external: false
@@ -219,11 +163,24 @@ auth:
     postgresPasswordKey: ${k8s_secret_key_auth_db_password}
     jwtSigningKey: ${k8s_secret_key_jwt_signing_key}
 
+  %{ if microsoft_sso_enabled }
+  loginModes: "microsoft"
+  %{ else }
   loginModes: "password"
+  %{ endif }
 
-  # TODO: optional Microsoft SSO
+  # Optional Microsoft SSO
+  %{ if microsoft_sso_enabled }
   microsoft:
-    enabled: false
+    enabled: ${microsoft_sso_enabled}
+    tenantId: ${microsoft_sso_tenant_id}
+    redirectUri: https://${platform_domain}/backend/auth/oauth/microsoft/callback
+    existingSecret:
+      name: ${secret_provider_class_secret_name}
+      clientIdKey: ${k8s_secret_key_microsoft_sso_client_id}
+      clientSecretKey: ${k8s_secret_key_microsoft_sso_client_secret}
+  %{ endif }
+
 
   volumeMounts:
     - name: secrets-store
@@ -286,6 +243,7 @@ frontend:
 openAi:
   enabled: true
   gpt4oDeployment: ${openai_gpt4o_deployment}
+  translationDeployment: ${openai_translation_deployment}
   endpoint: ${openai_endpoint}
 
   existingSecret:
