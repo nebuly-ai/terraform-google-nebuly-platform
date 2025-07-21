@@ -38,12 +38,15 @@ For more information on how to check and increase quotas, refer to the [GCP Docu
   
 
 ## Quickstart
+To get started with installing Nebuly on GCP, follow the steps below.
+This guide uses the standard configuration provided by the official Nebuly Helm chart.
 
-To get started with Nebuly installation on GCP, you can follow the steps below. 
+For advanced configurations or support, feel free to reach out via the Nebuly Slack channel or email us at [support@nebuly.ai](mailto:support@nebuly.ai).
 
-These instructions will guide you through the installation using Nebuly's default standard configuration with the Nebuly Helm Chart.
+Additional examples are available:
 
-For specific configurations or assistance, reach out to the Nebuly Slack channel or email [support@nebuly.ai](mailto:support@nebuly.ai).
+* [Basic](./examples/basic/README.md): Minimal setup with default settings.
+* [Microsoft SSO](./examples/microsoft-sso/README.md): Setup with Microsoft SSO authentication.
 
 ### 1. Terraform setup
 
