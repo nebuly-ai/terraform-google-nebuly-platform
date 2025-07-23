@@ -36,9 +36,12 @@ module "nebuly" {
     "your-user@email.com",
   ]
 
-  openai_api_key               = "my-key"
-  openai_endpoint              = "https://api.openai.com"
-  openai_gpt4o_deployment_name = "gpt-4"
+  platform_domain = "<your-domain.com>"
+
+  openai_api_key                     = "my-key"
+  openai_endpoint                    = "https://api.openai.com"
+  openai_gpt4o_deployment_name       = "gpt-4"
+  openai_translation_deployment_name = "gpt-4o-mini"
   nebuly_credentials = {
     client_id     = "<your-nebuly-client-id>"
     client_secret = "<your-nebuly-client-secret>"

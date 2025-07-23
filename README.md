@@ -87,6 +87,15 @@ The auto-generated Helm values use the name defined in the k8s_image_pull_secret
 Create a Kubernetes [Image Pull Secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) for 
 authenticating with your Docker registry and pulling the Nebuly Docker images.
 
+Example:
+
+```shell
+kubectl create secret generic nebuly-docker-pull \
+  -n nebuly \    
+  --from-file=.dockerconfigjson=dockerconfig.json \
+  --type=kubernetes.io/dockerconfigjson
+```
+
 ### 4. Bootstrap GKE cluster
 
 Install the bootstrap Helm chart to set up all the dependencies required for installing the Nebuly Platform Helm chart on GKE.
@@ -202,7 +211,7 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_postgres_server_edition"></a> [postgres\_server\_edition](#input\_postgres\_server\_edition) | The edition of the PostgreSQL server. Possible values are ENTERPRISE, ENTERPRISE\_PLUS. | `string` | `"ENTERPRISE"` | no |
 | <a name="input_postgres_server_high_availability"></a> [postgres\_server\_high\_availability](#input\_postgres\_server\_high\_availability) | The high availability configuration for the PostgreSQL server. | <pre>object({<br/>    enabled : bool<br/>  })</pre> | <pre>{<br/>  "enabled": true<br/>}</pre> | no |
 | <a name="input_postgres_server_maintenance_window"></a> [postgres\_server\_maintenance\_window](#input\_postgres\_server\_maintenance\_window) | Time window when the PostgreSQL server can automatically restart to apply updates. Specified in UTC time. | <pre>object({<br/>    day : string<br/>    hour : number<br/>  })</pre> | <pre>{<br/>  "day": "6",<br/>  "hour": 23<br/>}</pre> | no |
-| <a name="input_postgres_server_tier"></a> [postgres\_server\_tier](#input\_postgres\_server\_tier) | The tier of the PostgreSQL server. Default value: 4 vCPU, 16GB memory. | `string` | `"db-standard-4"` | no |
+| <a name="input_postgres_server_tier"></a> [postgres\_server\_tier](#input\_postgres\_server\_tier) | The tier of the PostgreSQL server. Default value: 4 vCPU, 16GB memory. | `string` | `"db-n1-standard-4"` | no |
 | <a name="input_region"></a> [region](#input\_region) | The region where the resources will be created | `string` | n/a | yes |
 | <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | The prefix that is used for generating resource names. | `string` | n/a | yes |
 
@@ -214,41 +223,41 @@ You can find examples of code that uses this Terraform module in the [examples](
 - resource.google_compute_network_peering_routes_config.main (/terraform-docs/main.tf#73)
 - resource.google_compute_subnetwork.main (/terraform-docs/main.tf#50)
 - resource.google_container_cluster.main (/terraform-docs/main.tf#206)
-- resource.google_container_node_pool.main (/terraform-docs/main.tf#253)
-- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#340)
-- resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#317)
-- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#357)
-- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#409)
-- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#425)
-- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#383)
-- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#395)
-- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#371)
+- resource.google_container_node_pool.main (/terraform-docs/main.tf#254)
+- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#341)
+- resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#318)
+- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#358)
+- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#410)
+- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#426)
+- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#384)
+- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#396)
+- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#372)
 - resource.google_secret_manager_secret.postgres_analytics_password (/terraform-docs/main.tf#150)
 - resource.google_secret_manager_secret.postgres_analytics_username (/terraform-docs/main.tf#138)
 - resource.google_secret_manager_secret.postgres_auth_password (/terraform-docs/main.tf#191)
 - resource.google_secret_manager_secret.postgres_auth_username (/terraform-docs/main.tf#179)
-- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#365)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#419)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#435)
-- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#391)
-- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#403)
-- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#379)
+- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#366)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#420)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#436)
+- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#392)
+- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#404)
+- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#380)
 - resource.google_secret_manager_secret_version.postgres_analytics_password (/terraform-docs/main.tf#158)
 - resource.google_secret_manager_secret_version.postgres_analytics_username (/terraform-docs/main.tf#146)
 - resource.google_secret_manager_secret_version.postgres_auth_password (/terraform-docs/main.tf#199)
 - resource.google_secret_manager_secret_version.postgres_auth_username (/terraform-docs/main.tf#187)
-- resource.google_service_account.gke_node_pool (/terraform-docs/main.tf#249)
+- resource.google_service_account.gke_node_pool (/terraform-docs/main.tf#250)
 - resource.google_service_networking_connection.main (/terraform-docs/main.tf#68)
 - resource.google_sql_database.analytics (/terraform-docs/main.tf#122)
 - resource.google_sql_database.auth (/terraform-docs/main.tf#163)
 - resource.google_sql_database_instance.main (/terraform-docs/main.tf#82)
 - resource.google_sql_user.analytics (/terraform-docs/main.tf#133)
 - resource.google_sql_user.auth (/terraform-docs/main.tf#174)
-- resource.google_storage_bucket.main (/terraform-docs/main.tf#444)
-- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#328)
+- resource.google_storage_bucket.main (/terraform-docs/main.tf#445)
+- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#329)
 - resource.random_password.analytics (/terraform-docs/main.tf#128)
 - resource.random_password.auth (/terraform-docs/main.tf#169)
-- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#353)
+- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#354)
 - data source.google_compute_zones.available (/terraform-docs/main.tf#23)
 - data source.google_container_engine_versions.main (/terraform-docs/main.tf#24)
 - data source.google_project.current (/terraform-docs/main.tf#22)

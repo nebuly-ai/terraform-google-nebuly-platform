@@ -114,6 +114,15 @@ The auto-generated Helm values use the name defined in the k8s_image_pull_secret
 Create a Kubernetes [Image Pull Secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) for
 authenticating with your Docker registry and pulling the Nebuly Docker images.
 
+Example:
+
+```shell
+kubectl create secret generic nebuly-docker-pull \
+  -n nebuly \
+  --from-file=.dockerconfigjson=dockerconfig.json \
+  --type=kubernetes.io/dockerconfigjson
+```
+
 ### 3. Bootstrap GKE cluster
 
 Install the bootstrap Helm chart to set up all the dependencies required for installing the Nebuly Platform Helm chart on GKE.

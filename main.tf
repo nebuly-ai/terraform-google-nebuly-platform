@@ -229,6 +229,7 @@ resource "google_container_cluster" "main" {
     workload_pool = "${data.google_project.current.project_id}.svc.id.goog"
   }
 
+
   secret_manager_config {
     # Add-on doesn't support Sync as Kubernetes Secret, so we install it separately.
     enabled = false
