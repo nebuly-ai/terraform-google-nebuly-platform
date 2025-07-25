@@ -204,10 +204,14 @@ resource "google_secret_manager_secret_version" "postgres_auth_password" {
 
 # ------ GKE ------ #
 locals {
-  gke_master_authorized_cird_blocks = {
-    "primary-vpc" : var.network_cidr_blocks.primary,
-  }
+  gke_master_authorized_cidr_blocks = var.gke_private_cluster_config == null ? {} : merge(
+    {
+      "primary-vpc" = var.network_cidr_blocks.primary
+    },
+    var.gke_private_cluster_config.authorized_cidr_blocks
+  )
 }
+
 resource "google_container_cluster" "main" {
   name     = local.gke_cluster_name
   location = var.region
@@ -236,7 +240,7 @@ resource "google_container_cluster" "main" {
     for_each = var.gke_private_cluster_config != null ? [1] : []
     content {
       dynamic "cidr_blocks" {
-        for_each = local.gke_master_authorized_cird_blocks
+        for_each = local.gke_master_authorized_cidr_blocks
         content {
           cidr_block   = cidr_blocks.value
           display_name = cidr_blocks.key

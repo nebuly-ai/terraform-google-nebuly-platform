@@ -211,11 +211,13 @@ variable "gke_private_cluster_config" {
   - enable_private_nodes: Prevents nodes from having public IP addresses
   - enable_private_endpoint: Prevents access to the GKE master via public endpoint.
   - master_ipv4_cidr_block: Must be a /28 block not overlapping others.
+  - authorized_cidr_blocks: A set of CIDR blocks that are allowed to access the GKE master.
   EOT
   type = object({
     enable_private_nodes : bool
     enable_private_endpoint : bool
     master_ipv4_cidr_block : string
+    authorized_cidr_blocks : optional(map(string), {})
   })
   default = null
 }
