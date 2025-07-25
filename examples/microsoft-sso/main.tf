@@ -35,6 +35,9 @@ module "nebuly" {
   gke_cluster_admin_users = [
     "your-user@email.com",
   ]
+  postgres_server_high_availability = {
+    enabled = false
+  }
 
   platform_domain = "<your-domain.com>"
 

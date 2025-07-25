@@ -63,7 +63,7 @@ variable "network_cidr_blocks" {
 variable "postgres_server_tier" {
   description = "The tier of the PostgreSQL server. Default value: 4 vCPU, 16GB memory."
   type        = string
-  default     = "db-n1-standard-4"
+  default     = "db-custom-4-16384"
 }
 variable "postgres_server_delete_protection" {
   description = "Whether the PostgreSQL server should have delete protection enabled."
@@ -204,6 +204,20 @@ variable "gke_node_pools" {
       }
     }
   }
+}
+variable "gke_private_cluster_config" {
+  description = <<EOT
+  Configuration for the GKE private cluster.
+  - enable_private_nodes: Prevents nodes from having public IP addresses
+  - enable_private_endpoint: Prevents access to the GKE master via public endpoint.
+  - master_ipv4_cidr_block: Must be a /28 block not overlapping others.
+  EOT
+  type = object({
+    enable_private_nodes : bool
+    enable_private_endpoint : bool
+    master_ipv4_cidr_block : string
+  })
+  default = null
 }
 variable "gke_cluster_admin_users" {
   description = "The list of email addresses of the users who will have admin access to the GKE cluster."

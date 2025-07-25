@@ -203,6 +203,11 @@ resource "google_secret_manager_secret_version" "postgres_auth_password" {
 
 
 # ------ GKE ------ #
+locals {
+  gke_master_authorized_cird_blocks = {
+    "primary-vpc" : var.network_cidr_blocks.primary,
+  }
+}
 resource "google_container_cluster" "main" {
   name     = local.gke_cluster_name
   location = var.region
@@ -216,6 +221,31 @@ resource "google_container_cluster" "main" {
   network    = google_compute_network.main.id
   subnetwork = google_compute_subnetwork.main.id
 
+  dynamic "private_cluster_config" {
+    for_each = var.gke_private_cluster_config != null ? [1] : []
+
+    content {
+      enable_private_endpoint = var.gke_private_cluster_config.enable_private_endpoint
+      enable_private_nodes    = var.gke_private_cluster_config.enable_private_nodes
+
+      master_ipv4_cidr_block = var.gke_private_cluster_config.master_ipv4_cidr_block
+    }
+  }
+
+  dynamic "master_authorized_networks_config" {
+    for_each = var.gke_private_cluster_config != null ? [1] : []
+    content {
+      dynamic "cidr_blocks" {
+        for_each = local.gke_master_authorized_cird_blocks
+        content {
+          cidr_block   = cidr_blocks.value
+          display_name = cidr_blocks.key
+        }
+      }
+    }
+  }
+
+
   release_channel {
     channel = "UNSPECIFIED"
   }
@@ -228,7 +258,6 @@ resource "google_container_cluster" "main" {
   workload_identity_config {
     workload_pool = "${data.google_project.current.project_id}.svc.id.goog"
   }
-
 
   secret_manager_config {
     # Add-on doesn't support Sync as Kubernetes Secret, so we install it separately.

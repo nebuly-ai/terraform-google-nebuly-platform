@@ -45,7 +45,6 @@ module "platform" {
   resource_prefix = "dev-"
 
   postgres_server_delete_protection = false
-  postgres_server_tier              = "db-f1-micro"
   postgres_server_high_availability = {
     enabled = false
   }
@@ -54,6 +53,11 @@ module "platform" {
     "m.zanotti@nebuly.ai",
   ]
   gke_delete_protection = false
+  # gke_private_cluster_config = {
+  #   enable_private_nodes    = true
+  #   enable_private_endpoint = true
+  #   master_ipv4_cidr_block  = "172.172.16.0/28"
+  # }
 
   openai_api_key                     = "my-key"
   openai_endpoint                    = "https://api.openai.com"

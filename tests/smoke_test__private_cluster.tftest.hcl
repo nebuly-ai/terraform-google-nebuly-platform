@@ -21,6 +21,11 @@ run "smoke_test_plan" {
     openai_gpt4o_deployment_name = "gpt-4o"
     openai_translation_deployment_name = "gpt-4o-mini"
 
+    gke_private_cluster_config = {
+      enable_private_nodes  = true
+      enable_private_endpoint = true
+      master_ipv4_cidr_block  = "172.172.16.0/28" 
+    }
 
     # ------ Microsoft SSO ------ #
     microsoft_sso = {
