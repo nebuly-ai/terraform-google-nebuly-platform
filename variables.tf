@@ -138,7 +138,7 @@ variable "gke_service_account_name" {
 variable "gke_kubernetes_version" {
   description = "The used Kubernetes version for the GKE cluster."
   type        = string
-  default     = "1.32.4"
+  default     = "1.32."
 }
 variable "gke_delete_protection" {
   description = "Whether the GKE Cluster should have delete protection enabled."

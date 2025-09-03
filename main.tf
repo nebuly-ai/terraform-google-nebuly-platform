@@ -204,10 +204,9 @@ resource "google_secret_manager_secret_version" "postgres_auth_password" {
 
 # ------ GKE ------ #
 locals {
-  gke_master_authorized_cidr_blocks = var.gke_private_cluster_config == null ? {} : merge(
-    {
-      "primary-vpc" = var.network_cidr_blocks.primary
-    },
+  gke_master_authorized_cidr_blocks = (
+    var.gke_private_cluster_config == null ?
+    {} :
     var.gke_private_cluster_config.authorized_cidr_blocks
   )
 }
@@ -276,6 +275,17 @@ resource "google_container_cluster" "main" {
   min_master_version  = data.google_container_engine_versions.main.latest_master_version
   deletion_protection = var.gke_delete_protection
 
+
+
+  maintenance_policy {
+    recurring_window {
+      # Sat/Sun 02:00–04:00Z
+      recurrence = "FREQ=WEEKLY;BYDAY=SA,SU"
+      start_time = "2025-09-06T02:00:00Z"
+      end_time   = "2030-09-06T04:00:00Z"
+    }
+  }
+
   depends_on = [
     google_compute_subnetwork.main,
   ]
@@ -307,6 +317,8 @@ resource "google_container_node_pool" "main" {
     auto_repair  = true
     auto_upgrade = false
   }
+
+  version = data.google_container_engine_versions.main.latest_node_version
 
   node_config {
     preemptible  = each.value.preemptible
