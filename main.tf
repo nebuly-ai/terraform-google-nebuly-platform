@@ -279,10 +279,9 @@ resource "google_container_cluster" "main" {
 
   maintenance_policy {
     recurring_window {
-      # Sat/Sun 02:00–04:00Z
-      recurrence = "FREQ=WEEKLY;BYDAY=SA,SU"
-      start_time = "2025-09-06T02:00:00Z"
-      end_time   = "2030-09-06T04:00:00Z"
+      recurrence = var.gke_maintenance_window.recurrence
+      start_time = var.gke_maintenance_window.start_time
+      end_time   = var.gke_maintenance_window.end_time
     }
   }
 

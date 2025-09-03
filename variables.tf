@@ -225,6 +225,20 @@ variable "gke_cluster_admin_users" {
   description = "The list of email addresses of the users who will have admin access to the GKE cluster."
   type        = set(string)
 }
+variable "gke_maintenance_window" {
+  description = "Time window when the GKE cluster can automatically restart to apply updates. Specified in UTC time."
+  type = object({
+    recurrence : string
+    start_time : number
+    end_time : number
+  })
+  default = {
+    # Sat/Sun 02:00–04:00Z
+    recurrence = "FREQ=WEEKLY;BYDAY=SA,SU"
+    start_time = "2025-09-06T02:00:00Z"
+    end_time   = "2030-09-06T04:00:00Z"
+  }
+}
 
 
 # ------ External credentials ------ #
