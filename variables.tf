@@ -229,8 +229,8 @@ variable "gke_maintenance_window" {
   description = "Time window when the GKE cluster can automatically restart to apply updates. Specified in UTC time."
   type = object({
     recurrence : string
-    start_time : number
-    end_time : number
+    start_time : string
+    end_time : string
   })
   default = {
     # Sat/Sun 02:00–04:00Z
