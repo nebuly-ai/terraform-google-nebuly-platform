@@ -126,7 +126,7 @@ primaryProcessing:
 
 kafka:
   external: false
-  zookeeper:
+  controller:
     replicas: 1
     storage:
       class: standard-rwo
