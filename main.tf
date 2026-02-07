@@ -95,8 +95,15 @@ resource "google_sql_database_instance" "main" {
     user_labels = var.labels
 
     ip_configuration {
-      ipv4_enabled    = "false"
+      ipv4_enabled    = length(var.allowed_ip_addresses) > 0
       private_network = google_compute_network.main.id
+      dynamic "authorized_networks" {
+        for_each = var.allowed_ip_addresses
+        content {
+          name  = authorized_networks.key
+          value = authorized_networks.value
+        }
+      }
     }
 
     maintenance_window {

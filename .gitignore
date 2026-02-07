@@ -5,3 +5,4 @@ secrets.auto.tfvars
 backend.tfvars
 .terraform.lock.hcl
 credentials.json
+tests/dev-provisioning/*.yaml

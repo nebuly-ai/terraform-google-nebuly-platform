@@ -58,6 +58,20 @@ variable "network_cidr_blocks" {
   }
 }
 
+variable "allowed_ip_addresses" {
+  description = <<EOT
+  Map of CIDR blocks allowed to connect to the PostgreSQL Cloud SQL instance via public IPv4.
+  Each entry key is a human-readable name (e.g. "office", "vpn") and the value is a CIDR block
+  (e.g. "1.2.3.4/32").
+
+  If this variable is provided (non-empty), the PostgreSQL instance will be exposed to the internet
+  (public IP enabled) and access will be restricted to the specified CIDR ranges.
+  EOT
+
+  type    = map(string)
+  default = {}
+}
+
 
 # ------ PostgreSQL ------ #
 variable "postgres_server_tier" {
