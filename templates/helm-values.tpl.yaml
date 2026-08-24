@@ -165,10 +165,12 @@ auth:
 
   %{ if microsoft_sso_enabled }
   loginModes: "microsoft,password"
-  %{ else if okta_sso_enabled }
+  %{ else }
+  %{ if okta_sso_enabled }
   loginModes: "okta,password"
   %{ else }
   loginModes: "password"
+  %{ endif }
   %{ endif }
 
   # Optional Microsoft SSO
