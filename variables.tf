@@ -28,6 +28,10 @@ variable "openai_gpt4o_deployment_name" {
   description = "The name of the deployment to use for the GPT-4o model."
   type        = string
 }
+variable "openai_gpt5_deployment_name" {
+  description = "The name of the deployment to use for the GPT-5 model."
+  type        = string
+}
 variable "openai_translation_deployment_name" {
   description = <<EOT
   The name of the deployment to use for enabling the translations feature. Recommended to use `gpt-4o-mini`.
@@ -152,7 +156,7 @@ variable "gke_service_account_name" {
 variable "gke_kubernetes_version" {
   description = "The used Kubernetes version for the GKE cluster."
   type        = string
-  default     = "1.32."
+  default     = "1.34."
 }
 variable "gke_delete_protection" {
   description = "Whether the GKE Cluster should have delete protection enabled."

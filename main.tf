@@ -508,6 +508,16 @@ locals {
   secret_provider_class_name        = "nebuly-platform"
   secret_provider_class_secret_name = "nebuly-platform-credentials"
 
+  # Accelerator type from the GPU node pool(s) deployed via gke_node_pools.
+  accelerator = one(distinct([
+    for pool in values(var.gke_node_pools) :
+    pool.guest_accelerator.type
+    if pool.guest_accelerator != null
+  ]))
+
+  # Enable ClickHouse helm values when a dedicated clickhouse node pool is defined.
+  clickhouse_enabled = contains(keys(var.gke_node_pools), "clickhouse")
+
   # k8s secrets keys
   k8s_secret_key_analytics_db_username       = "analytics-db-username"
   k8s_secret_key_analytics_db_password       = "analytics-db-password"
@@ -525,9 +535,12 @@ locals {
     {
       platform_domain        = var.platform_domain
       image_pull_secret_name = var.k8s_image_pull_secret_name
+      accelerator            = local.accelerator
+      clickhouse_enabled     = local.clickhouse_enabled
 
       openai_endpoint               = var.openai_endpoint
       openai_gpt4o_deployment       = var.openai_gpt4o_deployment_name
+      openai_gpt5_deployment        = var.openai_gpt5_deployment_name
       openai_translation_deployment = var.openai_translation_deployment_name
 
       secret_provider_class_name        = local.secret_provider_class_name

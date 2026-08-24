@@ -118,7 +118,7 @@ primaryProcessing:
               - key: nebuly.com/accelerator
                 operator: In
                 values:
-                  - nvidia-l4
+                  - ${accelerator}
   tolerations:
     - effect: NoSchedule
       key: nvidia.com/gpu
@@ -243,9 +243,61 @@ frontend:
 openAi:
   enabled: true
   gpt4oDeployment: ${openai_gpt4o_deployment}
+  gpt5Deployment: ${openai_gpt5_deployment}
   translationDeployment: ${openai_translation_deployment}
   endpoint: ${openai_endpoint}
 
   existingSecret:
     name: ${secret_provider_class_secret_name}
     apiKey: ${k8s_secret_key_openai_api_key}
+
+mcpServer:
+  enabled: true
+  apiEndpoint: "https://${platform_domain}/mcp"
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      # ------------
+      # Cert-manager issuer.
+      # Remove this section if you're not using cert-manager for SSL certificates.
+      cert-manager.io/cluster-issuer: letsencrypt
+      # ------------
+    enabled: true
+    className: "nginx"
+    hosts:
+      - host: ${platform_domain}
+        paths:
+          - path: "/mcp(/|$)(.*)"
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: nebuly-tls
+        hosts:
+          - ${platform_domain}
+
+%{ if clickhouse_enabled }
+clickhouse:
+  enabled: true
+  storage:
+    storageClassName: standard-rwo
+  tolerations:
+    - effect: NoSchedule
+      key: nebuly.com/reserved
+      operator: Equal
+      value: clickhouse 
+  backups:
+    enabled: true
+    remoteStorage: gcp_bucket
+    gcp:
+      bucketName: ${gcp_bucket_name}
+      projectName: ${gcp_project_name}
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: nebuly.com/reserved
+                operator: In
+                values:
+                  - clickhouse
+%{ endif }
