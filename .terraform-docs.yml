@@ -63,6 +63,7 @@ content: |-
 
   * [Basic](./examples/basic/README.md): Minimal setup with default settings.
   * [Microsoft SSO](./examples/microsoft-sso/README.md): Setup with Microsoft SSO authentication.
+  * [Okta SSO](./examples/okta-sso/README.md): Setup with Okta OIDC authentication.
 
   ### 1. Terraform setup
 

@@ -33,6 +33,13 @@ locals {
   secondary_ip_range_name_pods     = "${local.gke_cluster_name}-pods"
 }
 
+check "single_sso_provider" {
+  assert {
+    condition     = !(var.microsoft_sso != null && var.okta_sso != null)
+    error_message = "Only one of microsoft_sso or okta_sso can be configured."
+  }
+}
+
 
 # ------ Network ------ #
 resource "google_compute_network" "main" {
@@ -491,6 +498,40 @@ resource "google_secret_manager_secret_version" "microsoft_sso_client_secret" {
   secret_data = var.microsoft_sso.client_secret
 }
 
+# Okta SSO
+resource "google_secret_manager_secret" "okta_sso_client_id" {
+  count = var.okta_sso != null ? 1 : 0
+
+  secret_id = "${var.resource_prefix}-okta-sso-client-id"
+  labels    = var.labels
+
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "okta_sso_client_id" {
+  count = var.okta_sso != null ? 1 : 0
+
+  secret      = google_secret_manager_secret.okta_sso_client_id[0].id
+  secret_data = var.okta_sso.client_id
+}
+resource "google_secret_manager_secret" "okta_sso_client_secret" {
+  count = var.okta_sso != null ? 1 : 0
+
+  secret_id = "${var.resource_prefix}-okta-sso-client-secret"
+  labels    = var.labels
+
+  replication {
+    auto {}
+  }
+}
+resource "google_secret_manager_secret_version" "okta_sso_client_secret" {
+  count = var.okta_sso != null ? 1 : 0
+
+  secret      = google_secret_manager_secret.okta_sso_client_secret[0].id
+  secret_data = var.okta_sso.client_secret
+}
+
 
 # ------ Storage ------ #
 resource "google_storage_bucket" "main" {
@@ -529,6 +570,8 @@ locals {
   k8s_secret_key_nebuly_client_secret        = "nebuly-azure-client-secret"
   k8s_secret_key_microsoft_sso_client_id     = "microsoft-sso-client-id"
   k8s_secret_key_microsoft_sso_client_secret = "microsoft-sso-client-secret"
+  k8s_secret_key_okta_sso_client_id          = "okta-sso-client-id"
+  k8s_secret_key_okta_sso_client_secret      = "okta-sso-client-secret"
 
   helm_values = templatefile(
     "${path.module}/templates/helm-values.tpl.yaml",
@@ -555,6 +598,11 @@ locals {
       microsoft_sso_tenant_id                    = var.microsoft_sso != null ? var.microsoft_sso.tenant_id : ""
       k8s_secret_key_microsoft_sso_client_id     = local.k8s_secret_key_microsoft_sso_client_id
       k8s_secret_key_microsoft_sso_client_secret = local.k8s_secret_key_microsoft_sso_client_secret
+
+      okta_sso_enabled                      = var.okta_sso != null
+      okta_sso_issuer                       = var.okta_sso != null ? var.okta_sso.issuer : ""
+      k8s_secret_key_okta_sso_client_id     = local.k8s_secret_key_okta_sso_client_id
+      k8s_secret_key_okta_sso_client_secret = local.k8s_secret_key_okta_sso_client_secret
 
       k8s_secret_key_jwt_signing_key      = local.k8s_secret_key_jwt_signing_key
       k8s_secret_key_openai_api_key       = local.k8s_secret_key_openai_api_key
@@ -584,6 +632,8 @@ locals {
       secret_name_openai_api_key              = google_secret_manager_secret_version.openai_api_key.name
       secret_name_microsoft_sso_client_id     = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_id[0].name
       secret_name_microsoft_sso_client_secret = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_secret[0].name
+      secret_name_okta_sso_client_id          = var.okta_sso == null ? "" : google_secret_manager_secret_version.okta_sso_client_id[0].name
+      secret_name_okta_sso_client_secret      = var.okta_sso == null ? "" : google_secret_manager_secret_version.okta_sso_client_secret[0].name
 
       secret_name_nebuly_client_id     = google_secret_manager_secret_version.nebuly_client_id.name
       secret_name_nebuly_client_secret = google_secret_manager_secret_version.nebuly_client_secret.name
@@ -591,6 +641,10 @@ locals {
       microsoft_sso_enabled                      = var.microsoft_sso != null
       k8s_secret_key_microsoft_sso_client_id     = local.k8s_secret_key_microsoft_sso_client_id
       k8s_secret_key_microsoft_sso_client_secret = local.k8s_secret_key_microsoft_sso_client_secret
+
+      okta_sso_enabled                      = var.okta_sso != null
+      k8s_secret_key_okta_sso_client_id     = local.k8s_secret_key_okta_sso_client_id
+      k8s_secret_key_okta_sso_client_secret = local.k8s_secret_key_okta_sso_client_secret
 
       k8s_secret_key_auth_db_username      = local.k8s_secret_key_auth_db_username
       k8s_secret_key_auth_db_password      = local.k8s_secret_key_auth_db_password

@@ -303,5 +303,14 @@ variable "microsoft_sso" {
   })
   default = null
 }
+variable "okta_sso" {
+  description = "Settings for configuring the Okta OIDC SSO integration."
+  type = object({
+    client_id : string
+    client_secret : string
+    issuer : string
+  })
+  default = null
+}
 
 

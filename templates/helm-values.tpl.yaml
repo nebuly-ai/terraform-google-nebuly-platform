@@ -164,7 +164,9 @@ auth:
     jwtSigningKey: ${k8s_secret_key_jwt_signing_key}
 
   %{ if microsoft_sso_enabled }
-  loginModes: "microsoft"
+  loginModes: "microsoft,password"
+  %{ else if okta_sso_enabled }
+  loginModes: "okta,password"
   %{ else }
   loginModes: "password"
   %{ endif }
@@ -179,6 +181,18 @@ auth:
       name: ${secret_provider_class_secret_name}
       clientIdKey: ${k8s_secret_key_microsoft_sso_client_id}
       clientSecretKey: ${k8s_secret_key_microsoft_sso_client_secret}
+  %{ endif }
+
+  # Optional Okta SSO
+  %{ if okta_sso_enabled }
+  okta:
+    enabled: ${okta_sso_enabled}
+    issuer: ${okta_sso_issuer}
+    redirectUri: https://${platform_domain}/backend/auth/oauth/okta/callback
+    existingSecret:
+      name: ${secret_provider_class_secret_name}
+      clientIdKey: ${k8s_secret_key_okta_sso_client_id}
+      clientSecretKey: ${k8s_secret_key_okta_sso_client_secret}
   %{ endif }
 
 
