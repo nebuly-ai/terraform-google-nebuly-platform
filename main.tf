@@ -549,10 +549,15 @@ locals {
   secret_provider_class_name        = "nebuly-platform"
   secret_provider_class_secret_name = "nebuly-platform-credentials"
 
-  # Accelerator type from the GPU node pool(s) deployed via gke_node_pools.
+  # Accelerator type/count from the GPU node pool(s) deployed via gke_node_pools.
   accelerator = one(distinct([
     for pool in values(var.gke_node_pools) :
     pool.guest_accelerator.type
+    if pool.guest_accelerator != null
+  ]))
+  accelerator_count = one(distinct([
+    for pool in values(var.gke_node_pools) :
+    pool.guest_accelerator.count
     if pool.guest_accelerator != null
   ]))
 
@@ -579,6 +584,7 @@ locals {
       platform_domain        = var.platform_domain
       image_pull_secret_name = var.k8s_image_pull_secret_name
       accelerator            = local.accelerator
+      accelerator_count      = local.accelerator_count
       clickhouse_enabled     = local.clickhouse_enabled
 
       openai_endpoint               = var.openai_endpoint

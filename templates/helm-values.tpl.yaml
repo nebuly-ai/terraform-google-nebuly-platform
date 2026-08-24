@@ -108,7 +108,7 @@ primaryProcessing:
       cpu: 1
       memory: 8Gi
     limits:
-      nvidia.com/gpu: 1
+      nvidia.com/gpu: ${accelerator_count}
 
   affinity:
     nodeAffinity:
