@@ -47,6 +47,7 @@ Additional examples are available:
 
 * [Basic](./examples/basic/README.md): Minimal setup with default settings.
 * [Microsoft SSO](./examples/microsoft-sso/README.md): Setup with Microsoft SSO authentication.
+* [Okta SSO](./examples/okta-sso/README.md): Setup with Okta OIDC authentication.
 
 ### 1. Terraform setup
 
@@ -192,7 +193,7 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_allowed_ip_addresses"></a> [allowed\_ip\_addresses](#input\_allowed\_ip\_addresses) | Map of CIDR blocks allowed to connect to the PostgreSQL Cloud SQL instance via public IPv4.<br/>  Each entry key is a human-readable name (e.g. "office", "vpn") and the value is a CIDR block<br/>  (e.g. "1.2.3.4/32").<br/><br/>  If this variable is provided (non-empty), the PostgreSQL instance will be exposed to the internet<br/>  (public IP enabled) and access will be restricted to the specified CIDR ranges. | `map(string)` | `{}` | no |
 | <a name="input_gke_cluster_admin_users"></a> [gke\_cluster\_admin\_users](#input\_gke\_cluster\_admin\_users) | The list of email addresses of the users who will have admin access to the GKE cluster. | `set(string)` | n/a | yes |
 | <a name="input_gke_delete_protection"></a> [gke\_delete\_protection](#input\_gke\_delete\_protection) | Whether the GKE Cluster should have delete protection enabled. | `bool` | `true` | no |
-| <a name="input_gke_kubernetes_version"></a> [gke\_kubernetes\_version](#input\_gke\_kubernetes\_version) | The used Kubernetes version for the GKE cluster. | `string` | `"1.32."` | no |
+| <a name="input_gke_kubernetes_version"></a> [gke\_kubernetes\_version](#input\_gke\_kubernetes\_version) | The used Kubernetes version for the GKE cluster. | `string` | `"1.34."` | no |
 | <a name="input_gke_maintenance_window"></a> [gke\_maintenance\_window](#input\_gke\_maintenance\_window) | Time window when the GKE cluster can automatically restart to apply updates. Specified in UTC time. | <pre>object({<br/>    recurrence : string<br/>    start_time : string<br/>    end_time : string<br/>  })</pre> | <pre>{<br/>  "end_time": "2030-09-06T04:00:00Z",<br/>  "recurrence": "FREQ=WEEKLY;BYDAY=SA,SU",<br/>  "start_time": "2025-09-06T02:00:00Z"<br/>}</pre> | no |
 | <a name="input_gke_nebuly_namespaces"></a> [gke\_nebuly\_namespaces](#input\_gke\_nebuly\_namespaces) | The namespaces used by Nebuly installation. Update this if you use custom namespaces in the Helm chart installation. | `set(string)` | <pre>[<br/>  "nebuly",<br/>  "nebuly-bootstrap"<br/>]</pre> | no |
 | <a name="input_gke_node_pools"></a> [gke\_node\_pools](#input\_gke\_node\_pools) | The node Pools used by the GKE cluster. | <pre>map(object({<br/>    machine_type    = string<br/>    min_nodes       = number<br/>    max_nodes       = number<br/>    node_count      = number<br/>    resource_labels = optional(map(string), {})<br/>    disk_type       = optional(string, "pd-balanced")<br/>    disk_size_gb    = optional(number, 128)<br/>    node_locations  = optional(set(string), null)<br/>    preemptible     = optional(bool, false)<br/>    labels          = optional(map(string), {})<br/>    taints = optional(set(object({<br/>      key    = string<br/>      value  = string<br/>      effect = string<br/>    })), null)<br/>    guest_accelerator = optional(object({<br/>      type  = string<br/>      count = number<br/>    }), null)<br/>  }))</pre> | <pre>{<br/>  "gpu-primary": {<br/>    "guest_accelerator": {<br/>      "count": 1,<br/>      "type": "nvidia-l4"<br/>    },<br/>    "labels": {<br/>      "gke-no-default-nvidia-gpu-device-plugin": true,<br/>      "nebuly.com/accelerator": "nvidia-l4"<br/>    },<br/>    "machine_type": "g2-standard-8",<br/>    "max_nodes": 1,<br/>    "min_nodes": 0,<br/>    "node_count": null,<br/>    "resource_labels": {<br/>      "goog-gke-accelerator-type": "nvidia-l4",<br/>      "goog-gke-node-pool-provisioning-model": "on-demand"<br/>    }<br/>  },<br/>  "web-services": {<br/>    "machine_type": "n2-highmem-4",<br/>    "max_nodes": 1,<br/>    "min_nodes": 1,<br/>    "node_count": 1,<br/>    "resource_labels": {<br/>      "goog-gke-node-pool-provisioning-model": "on-demand"<br/>    }<br/>  }<br/>}</pre> | no |
@@ -203,9 +204,11 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_microsoft_sso"></a> [microsoft\_sso](#input\_microsoft\_sso) | Settings for configuring the Microsoft Entra SSO integration. | <pre>object({<br/>    tenant_id : string<br/>    client_id : string<br/>    client_secret : string<br/>  })</pre> | `null` | no |
 | <a name="input_nebuly_credentials"></a> [nebuly\_credentials](#input\_nebuly\_credentials) | The credentials provided by Nebuly are required for activating your platform installation. <br/>  If you haven't received your credentials or have lost them, please contact support@nebuly.ai. | <pre>object({<br/>    client_id : string<br/>    client_secret : string<br/>  })</pre> | n/a | yes |
 | <a name="input_network_cidr_blocks"></a> [network\_cidr\_blocks](#input\_network\_cidr\_blocks) | The CIDR blocks of the VPC network used by Nebuly.<br/><br/>  - primary: The primary CIDR block of the VPC network.<br/>  - secondary\_gke\_pods: The secondary CIDR block used by GKE for pods.<br/>  - secondary\_gke\_services: The secondary CIDR block used by GKE for services. | <pre>object({<br/>    primary : string<br/>    secondary_gke_pods : string<br/>    secondary_gke_services : string<br/>  })</pre> | <pre>{<br/>  "primary": "10.0.0.0/16",<br/>  "secondary_gke_pods": "10.4.0.0/16",<br/>  "secondary_gke_services": "10.6.0.0/16"<br/>}</pre> | no |
+| <a name="input_okta_sso"></a> [okta\_sso](#input\_okta\_sso) | Settings for configuring the Okta OIDC SSO integration. | <pre>object({<br/>    client_id : string<br/>    client_secret : string<br/>    issuer : string<br/>  })</pre> | `null` | no |
 | <a name="input_openai_api_key"></a> [openai\_api\_key](#input\_openai\_api\_key) | The API Key used for authenticating with OpenAI. | `string` | n/a | yes |
 | <a name="input_openai_endpoint"></a> [openai\_endpoint](#input\_openai\_endpoint) | The endpoint of the OpenAI API. | `string` | n/a | yes |
 | <a name="input_openai_gpt4o_deployment_name"></a> [openai\_gpt4o\_deployment\_name](#input\_openai\_gpt4o\_deployment\_name) | The name of the deployment to use for the GPT-4o model. | `string` | n/a | yes |
+| <a name="input_openai_gpt5_deployment_name"></a> [openai\_gpt5\_deployment\_name](#input\_openai\_gpt5\_deployment\_name) | The name of the deployment to use for the GPT-5 model. | `string` | n/a | yes |
 | <a name="input_openai_translation_deployment_name"></a> [openai\_translation\_deployment\_name](#input\_openai\_translation\_deployment\_name) | The name of the deployment to use for enabling the translations feature. Recommended to use `gpt-4o-mini`.<br/>  Provide an empty string to disable the translations feature. | `string` | n/a | yes |
 | <a name="input_platform_domain"></a> [platform\_domain](#input\_platform\_domain) | The domain on which the deployed Nebuly platform is made accessible. | `string` | n/a | yes |
 | <a name="input_postgres_server_backup_configuration"></a> [postgres\_server\_backup\_configuration](#input\_postgres\_server\_backup\_configuration) | The backup settings of the PostgreSQL server. | <pre>object({<br/>    enabled                        = bool<br/>    point_in_time_recovery_enabled = bool<br/>    n_retained_backups             = number<br/>  })</pre> | <pre>{<br/>  "enabled": true,<br/>  "n_retained_backups": 14,<br/>  "point_in_time_recovery_enabled": true<br/>}</pre> | no |
@@ -221,46 +224,50 @@ You can find examples of code that uses this Terraform module in the [examples](
 ## Resources
 
 
-- resource.google_compute_global_address.main (/terraform-docs/main.tf#43)
-- resource.google_compute_network.main (/terraform-docs/main.tf#38)
-- resource.google_compute_network_peering_routes_config.main (/terraform-docs/main.tf#73)
-- resource.google_compute_subnetwork.main (/terraform-docs/main.tf#50)
-- resource.google_container_cluster.main (/terraform-docs/main.tf#221)
-- resource.google_container_node_pool.main (/terraform-docs/main.tf#303)
-- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#392)
-- resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#369)
-- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#409)
-- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#461)
-- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#477)
-- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#435)
-- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#447)
-- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#423)
-- resource.google_secret_manager_secret.postgres_analytics_password (/terraform-docs/main.tf#157)
-- resource.google_secret_manager_secret.postgres_analytics_username (/terraform-docs/main.tf#145)
-- resource.google_secret_manager_secret.postgres_auth_password (/terraform-docs/main.tf#198)
-- resource.google_secret_manager_secret.postgres_auth_username (/terraform-docs/main.tf#186)
-- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#417)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#471)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#487)
-- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#443)
-- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#455)
-- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#431)
-- resource.google_secret_manager_secret_version.postgres_analytics_password (/terraform-docs/main.tf#165)
-- resource.google_secret_manager_secret_version.postgres_analytics_username (/terraform-docs/main.tf#153)
-- resource.google_secret_manager_secret_version.postgres_auth_password (/terraform-docs/main.tf#206)
-- resource.google_secret_manager_secret_version.postgres_auth_username (/terraform-docs/main.tf#194)
-- resource.google_service_account.gke_node_pool (/terraform-docs/main.tf#299)
-- resource.google_service_networking_connection.main (/terraform-docs/main.tf#68)
-- resource.google_sql_database.analytics (/terraform-docs/main.tf#129)
-- resource.google_sql_database.auth (/terraform-docs/main.tf#170)
-- resource.google_sql_database_instance.main (/terraform-docs/main.tf#82)
-- resource.google_sql_user.analytics (/terraform-docs/main.tf#140)
-- resource.google_sql_user.auth (/terraform-docs/main.tf#181)
-- resource.google_storage_bucket.main (/terraform-docs/main.tf#496)
-- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#380)
-- resource.random_password.analytics (/terraform-docs/main.tf#135)
-- resource.random_password.auth (/terraform-docs/main.tf#176)
-- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#405)
+- resource.google_compute_global_address.main (/terraform-docs/main.tf#50)
+- resource.google_compute_network.main (/terraform-docs/main.tf#45)
+- resource.google_compute_network_peering_routes_config.main (/terraform-docs/main.tf#80)
+- resource.google_compute_subnetwork.main (/terraform-docs/main.tf#57)
+- resource.google_container_cluster.main (/terraform-docs/main.tf#228)
+- resource.google_container_node_pool.main (/terraform-docs/main.tf#310)
+- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#399)
+- resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#376)
+- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#416)
+- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#468)
+- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#484)
+- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#442)
+- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#454)
+- resource.google_secret_manager_secret.okta_sso_client_id (/terraform-docs/main.tf#502)
+- resource.google_secret_manager_secret.okta_sso_client_secret (/terraform-docs/main.tf#518)
+- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#430)
+- resource.google_secret_manager_secret.postgres_analytics_password (/terraform-docs/main.tf#164)
+- resource.google_secret_manager_secret.postgres_analytics_username (/terraform-docs/main.tf#152)
+- resource.google_secret_manager_secret.postgres_auth_password (/terraform-docs/main.tf#205)
+- resource.google_secret_manager_secret.postgres_auth_username (/terraform-docs/main.tf#193)
+- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#424)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#478)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#494)
+- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#450)
+- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#462)
+- resource.google_secret_manager_secret_version.okta_sso_client_id (/terraform-docs/main.tf#512)
+- resource.google_secret_manager_secret_version.okta_sso_client_secret (/terraform-docs/main.tf#528)
+- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#438)
+- resource.google_secret_manager_secret_version.postgres_analytics_password (/terraform-docs/main.tf#172)
+- resource.google_secret_manager_secret_version.postgres_analytics_username (/terraform-docs/main.tf#160)
+- resource.google_secret_manager_secret_version.postgres_auth_password (/terraform-docs/main.tf#213)
+- resource.google_secret_manager_secret_version.postgres_auth_username (/terraform-docs/main.tf#201)
+- resource.google_service_account.gke_node_pool (/terraform-docs/main.tf#306)
+- resource.google_service_networking_connection.main (/terraform-docs/main.tf#75)
+- resource.google_sql_database.analytics (/terraform-docs/main.tf#136)
+- resource.google_sql_database.auth (/terraform-docs/main.tf#177)
+- resource.google_sql_database_instance.main (/terraform-docs/main.tf#89)
+- resource.google_sql_user.analytics (/terraform-docs/main.tf#147)
+- resource.google_sql_user.auth (/terraform-docs/main.tf#188)
+- resource.google_storage_bucket.main (/terraform-docs/main.tf#537)
+- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#387)
+- resource.random_password.analytics (/terraform-docs/main.tf#142)
+- resource.random_password.auth (/terraform-docs/main.tf#183)
+- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#412)
 - data source.google_compute_zones.available (/terraform-docs/main.tf#23)
 - data source.google_container_engine_versions.main (/terraform-docs/main.tf#24)
 - data source.google_project.current (/terraform-docs/main.tf#22)
