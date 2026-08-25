@@ -182,7 +182,7 @@ You can find examples of code that uses this Terraform module in the [examples](
 | Name | Description |
 |------|-------------|
 | <a name="output_gke_cluster_get_credentials"></a> [gke\_cluster\_get\_credentials](#output\_gke\_cluster\_get\_credentials) | The command for connecting with the provisioned GKE cluster. |
-| <a name="output_helm_values"></a> [helm\_values](#output\_helm\_values) | The `values.yaml` file for installing Nebuly with Helm.<br/><br/>  The default standard configuration is used, which uses Nginx as ingress controller and exposes the application to the Internet. This configuration can be customized according to specific needs. |
+| <a name="output_helm_values"></a> [helm\_values](#output\_helm\_values) | The `values.yaml` file for installing Nebuly with Helm.<br/><br/>  The default standard configuration is used, which uses Traefik as ingress controller and exposes the application to the Internet. This configuration can be customized according to specific needs. |
 | <a name="output_secret_provider_class"></a> [secret\_provider\_class](#output\_secret\_provider\_class) | The `secret-provider-class.yaml` file to make Kubernetes reference the secrets stored in the Key Vault. |
 
 

@@ -6,3 +6,5 @@ backend.tfvars
 .terraform.lock.hcl
 credentials.json
 tests/dev-provisioning/*.yaml
+.DS_Store
+settings.json

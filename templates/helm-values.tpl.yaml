@@ -178,7 +178,7 @@ auth:
   microsoft:
     enabled: ${microsoft_sso_enabled}
     tenantId: ${microsoft_sso_tenant_id}
-    redirectUri: https://${platform_domain}/backend/auth/oauth/microsoft/callback
+    redirectUri: https://${platform_domain}/auth/oauth/microsoft/callback
     existingSecret:
       name: ${secret_provider_class_secret_name}
       clientIdKey: ${k8s_secret_key_microsoft_sso_client_id}
@@ -190,7 +190,7 @@ auth:
   okta:
     enabled: ${okta_sso_enabled}
     issuer: ${okta_sso_issuer}
-    redirectUri: https://${platform_domain}/backend/auth/oauth/okta/callback
+    redirectUri: https://${platform_domain}/auth/oauth/okta/callback
     existingSecret:
       name: ${secret_provider_class_secret_name}
       clientIdKey: ${k8s_secret_key_okta_sso_client_id}
@@ -296,7 +296,7 @@ clickhouse:
     - effect: NoSchedule
       key: nebuly.com/reserved
       operator: Equal
-      value: clickhouse 
+      value: clickhouse
   backups:
     enabled: true
     remoteStorage: gcp_bucket

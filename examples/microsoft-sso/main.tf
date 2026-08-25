@@ -66,7 +66,7 @@ output "helm_values" {
   description = <<EOT
   The `values.yaml` file for installing Nebuly with Helm.
 
-  The default standard configuration is used, which uses Nginx as ingress controller and exposes the application to the Internet. This configuration can be customized according to specific needs.
+  The default standard configuration is used, which uses Traefik as ingress controller and exposes the application to the Internet. This configuration can be customized according to specific needs.
   EOT
 }
 output "secret_provider_class" {
