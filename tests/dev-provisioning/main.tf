@@ -48,6 +48,11 @@ module "platform" {
   region          = var.region
   resource_prefix = "dev-"
 
+  postgres_server_delete_protection = false
+  postgres_server_high_availability = {
+    enabled = false
+  }
+
   gke_cluster_admin_users = [
     "d.cantella@nebuly.ai",
   ]
