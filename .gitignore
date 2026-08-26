@@ -1,4 +1,5 @@
 **/.terraform/
+**/dockerconfig.json
 *.secrets.auto.tfvars
 secrets.auto.tfvars
 .idea/

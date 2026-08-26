@@ -10,11 +10,11 @@ variable "project" {
 
 # ----------- Terraform setup ----------- #
 terraform {
-  required_version = ">1.8"
+  required_version = ">1.10"
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~>6.3"
+      version = "~>7.46"
     }
   }
 }
@@ -27,7 +27,7 @@ provider "google" {
 # ------ Main ------ #
 module "nebuly" {
   source  = "nebuly-ai/nebuly-platform/gcp"
-  version = ">=0.1.0"
+  version = ">=0.7.0"
 
   region          = var.region
   resource_prefix = "nbldev"

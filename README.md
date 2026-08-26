@@ -172,9 +172,9 @@ You can find examples of code that uses this Terraform module in the [examples](
 
 | Name | Version |
 |------|---------|
-| <a name="provider_google"></a> [google](#provider\_google) | ~>6.3.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | ~>3.6 |
-| <a name="provider_tls"></a> [tls](#provider\_tls) | ~>4.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | ~>7.46 |
+| <a name="provider_random"></a> [random](#provider\_random) | ~>3.9 |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | ~>4.3 |
 
 
 ## Outputs
