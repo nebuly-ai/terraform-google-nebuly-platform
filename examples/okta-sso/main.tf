@@ -42,8 +42,9 @@ module "nebuly" {
   platform_domain = "<your-domain.com>"
 
   openai_api_key                     = "my-key"
-  openai_endpoint                    = "https://api.openai.com"
+  openai_endpoint                    = "https://api.openai.com/v1"
   openai_gpt4o_deployment_name       = "gpt-4"
+  openai_gpt5_deployment_name        = "gpt-5"
   openai_translation_deployment_name = "gpt-4o-mini"
   nebuly_credentials = {
     client_id     = "<your-nebuly-client-id>"
@@ -65,7 +66,7 @@ output "helm_values" {
   description = <<EOT
   The `values.yaml` file for installing Nebuly with Helm.
 
-  The default standard configuration is used, which uses Nginx as ingress controller and exposes the application to the Internet. This configuration can be customized according to specific needs.
+  The default standard configuration is used, which uses Traefik as ingress controller and exposes the application to the Internet. This configuration can be customized according to specific needs.
   EOT
 }
 output "secret_provider_class" {

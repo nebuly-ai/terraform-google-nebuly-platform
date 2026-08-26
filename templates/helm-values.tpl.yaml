@@ -14,25 +14,26 @@ clusterIssuer:
   enabled: true
   name: letsencrypt
   email: support@nebuly.ai
+  ingressClass: traefik
 
 backend:
+  rootPath: /backend
   image:
     repository: "ghcr.io/nebuly-ai/nebuly-backend"
   ingress:
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: "/$2"
       # ------------
       # Cert-manager issuer.
       # Remove this section if you're not using cert-manager for SSL certificates.
       cert-manager.io/cluster-issuer: letsencrypt
       # ------------
     enabled: true
-    className: "nginx"
+    className: "traefik"
     hosts:
       - host: ${platform_domain}
         paths:
-          - path: /backend(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /backend
+            pathType: Prefix
     tls:
       - secretName: nebuly-tls
         hosts:
@@ -58,19 +59,18 @@ eventIngestion:
 
   ingress:
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: "/$2"
       # ------------
       # Cert-manager issuer.
       # Remove this section if you're not using cert-manager for SSL certificates.
       cert-manager.io/cluster-issuer: letsencrypt
       # ------------
     enabled: true
-    className: "nginx"
+    className: "traefik"
     hosts:
       - host: ${platform_domain}
         paths:
-          - path: /event-ingestion(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /event-ingestion
+            pathType: Prefix
     tls:
       - secretName: nebuly-tls
         hosts:
@@ -108,7 +108,7 @@ primaryProcessing:
       cpu: 1
       memory: 8Gi
     limits:
-      nvidia.com/gpu: 1
+      nvidia.com/gpu: ${accelerator_count}
 
   affinity:
     nodeAffinity:
@@ -118,7 +118,7 @@ primaryProcessing:
               - key: nebuly.com/accelerator
                 operator: In
                 values:
-                  - nvidia-l4
+                  - ${accelerator}
   tolerations:
     - effect: NoSchedule
       key: nvidia.com/gpu
@@ -164,9 +164,13 @@ auth:
     jwtSigningKey: ${k8s_secret_key_jwt_signing_key}
 
   %{ if microsoft_sso_enabled }
-  loginModes: "microsoft"
+  loginModes: "microsoft,password"
+  %{ else }
+  %{ if okta_sso_enabled }
+  loginModes: "okta,password"
   %{ else }
   loginModes: "password"
+  %{ endif }
   %{ endif }
 
   # Optional Microsoft SSO
@@ -174,11 +178,23 @@ auth:
   microsoft:
     enabled: ${microsoft_sso_enabled}
     tenantId: ${microsoft_sso_tenant_id}
-    redirectUri: https://${platform_domain}/backend/auth/oauth/microsoft/callback
+    redirectUri: https://${platform_domain}/auth/oauth/microsoft/callback
     existingSecret:
       name: ${secret_provider_class_secret_name}
       clientIdKey: ${k8s_secret_key_microsoft_sso_client_id}
       clientSecretKey: ${k8s_secret_key_microsoft_sso_client_secret}
+  %{ endif }
+
+  # Optional Okta SSO
+  %{ if okta_sso_enabled }
+  okta:
+    enabled: ${okta_sso_enabled}
+    issuer: ${okta_sso_issuer}
+    redirectUri: https://${platform_domain}/auth/oauth/okta/callback
+    existingSecret:
+      name: ${secret_provider_class_secret_name}
+      clientIdKey: ${k8s_secret_key_okta_sso_client_id}
+      clientSecretKey: ${k8s_secret_key_okta_sso_client_secret}
   %{ endif }
 
 
@@ -195,20 +211,18 @@ auth:
           secretProviderClass: ${secret_provider_class_name}
   ingress:
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: "/auth/$2"
-      nginx.ingress.kubernetes.io/use-regex: "true"
       # ------------
       # Cert-manager issuer.
       # Remove this section if you're not using cert-manager for SSL certificates.
       cert-manager.io/cluster-issuer: letsencrypt
       # ------------
     enabled: true
-    className: "nginx"
+    className: "traefik"
     hosts:
       - host: ${platform_domain}
         paths:
-          - path: "/backend/auth(/|$)(.*)"
-            pathType: ImplementationSpecific
+          - path: "/auth"
+            pathType: Prefix
     tls:
       - secretName: nebuly-tls
         hosts:
@@ -220,7 +234,7 @@ frontend:
 
   rootUrl: https://${platform_domain}
   backendApiUrl: https://${platform_domain}/backend
-  authApiUrl: https://${platform_domain}/backend/auth
+  authApiUrl: https://${platform_domain}/auth
   ingress:
     enabled: true
     annotations:
@@ -229,7 +243,7 @@ frontend:
       # Remove this section if you're not using cert-manager for SSL certificates.
       cert-manager.io/cluster-issuer: letsencrypt
       # ------------
-    className: "nginx"
+    className: "traefik"
     hosts:
       - host: ${platform_domain}
         paths:
@@ -243,9 +257,60 @@ frontend:
 openAi:
   enabled: true
   gpt4oDeployment: ${openai_gpt4o_deployment}
+  gpt5Deployment: ${openai_gpt5_deployment}
   translationDeployment: ${openai_translation_deployment}
   endpoint: ${openai_endpoint}
 
   existingSecret:
     name: ${secret_provider_class_secret_name}
     apiKey: ${k8s_secret_key_openai_api_key}
+
+mcpServer:
+  enabled: true
+  apiEndpoint: "https://${platform_domain}/mcp"
+  ingress:
+    annotations:
+      # ------------
+      # Cert-manager issuer.
+      # Remove this section if you're not using cert-manager for SSL certificates.
+      cert-manager.io/cluster-issuer: letsencrypt
+      # ------------
+    enabled: true
+    className: "traefik"
+    hosts:
+      - host: ${platform_domain}
+        paths:
+          - path: "/mcp"
+            pathType: Prefix
+    tls:
+      - secretName: nebuly-tls
+        hosts:
+          - ${platform_domain}
+
+%{ if clickhouse_enabled }
+clickhouse:
+  enabled: true
+  storage:
+    storageClassName: standard-rwo
+  tolerations:
+    - effect: NoSchedule
+      key: nebuly.com/reserved
+      operator: Equal
+      value: clickhouse
+  backups:
+    enabled: true
+    remoteStorage: gcp_bucket
+    gcp:
+      bucketName: ${gcp_bucket_name}
+      projectName: ${gcp_project_name}
+
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: nebuly.com/reserved
+                operator: In
+                values:
+                  - clickhouse
+%{ endif }
