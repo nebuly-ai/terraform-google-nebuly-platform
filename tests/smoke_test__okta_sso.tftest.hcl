@@ -2,6 +2,10 @@ run "setup" {
   module {
     source = "./tests/setup"
   }
+
+  # Setup only reads credentials from disk; do not inherit the Google provider
+  # whose config depends on this run's output (cycle on Terraform >= 1.10).
+  providers = {}
 }
 
 provider "google" {

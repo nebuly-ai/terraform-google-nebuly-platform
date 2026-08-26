@@ -2,6 +2,10 @@ run "setup" {
   module {
     source = "./tests/setup"
   }
+
+  # Setup only reads credentials from disk; do not inherit the Google provider
+  # whose config depends on this run's output (cycle on Terraform >= 1.10).
+  providers = {}
 }
 
 provider "google" {
@@ -20,6 +24,7 @@ run "smoke_test_plan" {
     openai_endpoint             = "https://test.nebuly.com"
     openai_gpt4o_deployment_name = "gpt-4o"
     openai_translation_deployment_name = "gpt-4o-mini"
+    openai_gpt5_deployment_name        = "gpt-5"
 
     gke_private_cluster_config = {
       enable_private_nodes  = true

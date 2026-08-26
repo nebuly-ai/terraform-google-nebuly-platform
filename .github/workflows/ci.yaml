@@ -26,7 +26,7 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.9.6"
+          terraform_version: "1.14.3"
 
       - name: Check is doc is update to date
         run: |
