@@ -310,10 +310,11 @@ resource "google_service_account" "gke_node_pool" {
 resource "google_container_node_pool" "main" {
   for_each = var.gke_node_pools
 
-  name       = each.key
-  cluster    = google_container_cluster.main.id
-  location   = var.region
-  node_count = each.value.node_count
+  name               = each.key
+  cluster            = google_container_cluster.main.id
+  location           = var.region
+  node_count         = each.value.node_count
+  initial_node_count = each.value.node_count == null ? each.value.min_nodes : null
   node_locations = (
     each.value.node_locations == null ?
     [data.google_compute_zones.available.names[0]] :
@@ -370,6 +371,7 @@ resource "google_container_node_pool" "main" {
   lifecycle {
     ignore_changes = [
       node_config[0].kubelet_config,
+      initial_node_count,
     ]
   }
 }
@@ -588,9 +590,9 @@ locals {
       clickhouse_enabled     = local.clickhouse_enabled
 
       openai_endpoint               = var.openai_endpoint
-      openai_gpt4o_deployment       = var.openai_gpt4o_deployment_name
-      openai_gpt5_deployment        = var.openai_gpt5_deployment_name
-      openai_translation_deployment = var.openai_translation_deployment_name
+      openai_tier1_model_deployment = var.openai_tier1_model_deployment_name
+      openai_tier2_model_deployment = var.openai_tier2_model_deployment_name
+      openai_tier3_model_deployment = var.openai_tier3_model_deployment_name
 
       secret_provider_class_name        = local.secret_provider_class_name
       secret_provider_class_secret_name = local.secret_provider_class_secret_name

@@ -256,9 +256,9 @@ frontend:
 
 openAi:
   enabled: true
-  gpt4oDeployment: ${openai_gpt4o_deployment}
-  gpt5Deployment: ${openai_gpt5_deployment}
-  translationDeployment: ${openai_translation_deployment}
+  tier1ModelDeployment: ${openai_tier1_model_deployment}
+  tier2ModelDeployment: ${openai_tier2_model_deployment}
+  tier3ModelDeployment: ${openai_tier3_model_deployment}
   endpoint: ${openai_endpoint}
 
   existingSecret:

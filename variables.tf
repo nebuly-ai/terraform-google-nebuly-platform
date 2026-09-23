@@ -24,20 +24,20 @@ variable "openai_endpoint" {
   description = "The endpoint of the OpenAI API."
   type        = string
 }
-variable "openai_gpt4o_deployment_name" {
-  description = "The name of the deployment to use for the GPT-4o model."
+variable "openai_tier1_model_deployment_name" {
+  description = "The name of the deployment to use for tier 1 model workloads."
   type        = string
+  default     = "gpt-5.6-sol"
 }
-variable "openai_gpt5_deployment_name" {
-  description = "The name of the deployment to use for the GPT-5 model."
+variable "openai_tier2_model_deployment_name" {
+  description = "The name of the deployment to use for tier 2 model workloads."
   type        = string
+  default     = "gpt-5.6-terra"
 }
-variable "openai_translation_deployment_name" {
-  description = <<EOT
-  The name of the deployment to use for enabling the translations feature. Recommended to use `gpt-4o-mini`.
-  Provide an empty string to disable the translations feature.
-  EOT
+variable "openai_tier3_model_deployment_name" {
+  description = "The name of the deployment to use for tier 3 model workloads."
   type        = string
+  default     = "gpt-5.6-luna"
 }
 
 

@@ -207,9 +207,9 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_okta_sso"></a> [okta\_sso](#input\_okta\_sso) | Settings for configuring the Okta OIDC SSO integration. | <pre>object({<br/>    client_id : string<br/>    client_secret : string<br/>    issuer : string<br/>  })</pre> | `null` | no |
 | <a name="input_openai_api_key"></a> [openai\_api\_key](#input\_openai\_api\_key) | The API Key used for authenticating with OpenAI. | `string` | n/a | yes |
 | <a name="input_openai_endpoint"></a> [openai\_endpoint](#input\_openai\_endpoint) | The endpoint of the OpenAI API. | `string` | n/a | yes |
-| <a name="input_openai_gpt4o_deployment_name"></a> [openai\_gpt4o\_deployment\_name](#input\_openai\_gpt4o\_deployment\_name) | The name of the deployment to use for the GPT-4o model. | `string` | n/a | yes |
-| <a name="input_openai_gpt5_deployment_name"></a> [openai\_gpt5\_deployment\_name](#input\_openai\_gpt5\_deployment\_name) | The name of the deployment to use for the GPT-5 model. | `string` | n/a | yes |
-| <a name="input_openai_translation_deployment_name"></a> [openai\_translation\_deployment\_name](#input\_openai\_translation\_deployment\_name) | The name of the deployment to use for enabling the translations feature. Recommended to use `gpt-4o-mini`.<br/>  Provide an empty string to disable the translations feature. | `string` | n/a | yes |
+| <a name="input_openai_tier1_model_deployment_name"></a> [openai\_tier1\_model\_deployment\_name](#input\_openai\_tier1\_model\_deployment\_name) | The name of the deployment to use for tier 1 model workloads. | `string` | `"gpt-5.6-sol"` | no |
+| <a name="input_openai_tier2_model_deployment_name"></a> [openai\_tier2\_model\_deployment\_name](#input\_openai\_tier2\_model\_deployment\_name) | The name of the deployment to use for tier 2 model workloads. | `string` | `"gpt-5.6-terra"` | no |
+| <a name="input_openai_tier3_model_deployment_name"></a> [openai\_tier3\_model\_deployment\_name](#input\_openai\_tier3\_model\_deployment\_name) | The name of the deployment to use for tier 3 model workloads. | `string` | `"gpt-5.6-luna"` | no |
 | <a name="input_platform_domain"></a> [platform\_domain](#input\_platform\_domain) | The domain on which the deployed Nebuly platform is made accessible. | `string` | n/a | yes |
 | <a name="input_postgres_server_backup_configuration"></a> [postgres\_server\_backup\_configuration](#input\_postgres\_server\_backup\_configuration) | The backup settings of the PostgreSQL server. | <pre>object({<br/>    enabled                        = bool<br/>    point_in_time_recovery_enabled = bool<br/>    n_retained_backups             = number<br/>  })</pre> | <pre>{<br/>  "enabled": true,<br/>  "n_retained_backups": 14,<br/>  "point_in_time_recovery_enabled": true<br/>}</pre> | no |
 | <a name="input_postgres_server_delete_protection"></a> [postgres\_server\_delete\_protection](#input\_postgres\_server\_delete\_protection) | Whether the PostgreSQL server should have delete protection enabled. | `bool` | `true` | no |
@@ -230,28 +230,28 @@ You can find examples of code that uses this Terraform module in the [examples](
 - resource.google_compute_subnetwork.main (/terraform-docs/main.tf#57)
 - resource.google_container_cluster.main (/terraform-docs/main.tf#228)
 - resource.google_container_node_pool.main (/terraform-docs/main.tf#310)
-- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#399)
-- resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#376)
-- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#416)
-- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#468)
-- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#484)
-- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#442)
-- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#454)
-- resource.google_secret_manager_secret.okta_sso_client_id (/terraform-docs/main.tf#502)
-- resource.google_secret_manager_secret.okta_sso_client_secret (/terraform-docs/main.tf#518)
-- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#430)
+- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#402)
+- resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#379)
+- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#419)
+- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#471)
+- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#487)
+- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#445)
+- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#457)
+- resource.google_secret_manager_secret.okta_sso_client_id (/terraform-docs/main.tf#505)
+- resource.google_secret_manager_secret.okta_sso_client_secret (/terraform-docs/main.tf#521)
+- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#433)
 - resource.google_secret_manager_secret.postgres_analytics_password (/terraform-docs/main.tf#164)
 - resource.google_secret_manager_secret.postgres_analytics_username (/terraform-docs/main.tf#152)
 - resource.google_secret_manager_secret.postgres_auth_password (/terraform-docs/main.tf#205)
 - resource.google_secret_manager_secret.postgres_auth_username (/terraform-docs/main.tf#193)
-- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#424)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#478)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#494)
-- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#450)
-- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#462)
-- resource.google_secret_manager_secret_version.okta_sso_client_id (/terraform-docs/main.tf#512)
-- resource.google_secret_manager_secret_version.okta_sso_client_secret (/terraform-docs/main.tf#528)
-- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#438)
+- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#427)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#481)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#497)
+- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#453)
+- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#465)
+- resource.google_secret_manager_secret_version.okta_sso_client_id (/terraform-docs/main.tf#515)
+- resource.google_secret_manager_secret_version.okta_sso_client_secret (/terraform-docs/main.tf#531)
+- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#441)
 - resource.google_secret_manager_secret_version.postgres_analytics_password (/terraform-docs/main.tf#172)
 - resource.google_secret_manager_secret_version.postgres_analytics_username (/terraform-docs/main.tf#160)
 - resource.google_secret_manager_secret_version.postgres_auth_password (/terraform-docs/main.tf#213)
@@ -263,11 +263,11 @@ You can find examples of code that uses this Terraform module in the [examples](
 - resource.google_sql_database_instance.main (/terraform-docs/main.tf#89)
 - resource.google_sql_user.analytics (/terraform-docs/main.tf#147)
 - resource.google_sql_user.auth (/terraform-docs/main.tf#188)
-- resource.google_storage_bucket.main (/terraform-docs/main.tf#537)
-- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#387)
+- resource.google_storage_bucket.main (/terraform-docs/main.tf#540)
+- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#390)
 - resource.random_password.analytics (/terraform-docs/main.tf#142)
 - resource.random_password.auth (/terraform-docs/main.tf#183)
-- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#412)
+- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#415)
 - data source.google_compute_zones.available (/terraform-docs/main.tf#23)
 - data source.google_container_engine_versions.main (/terraform-docs/main.tf#24)
 - data source.google_project.current (/terraform-docs/main.tf#22)

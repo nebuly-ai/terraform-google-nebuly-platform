@@ -52,6 +52,7 @@ module "platform" {
   postgres_server_high_availability = {
     enabled = false
   }
+  postgres_server_tier = "db-custom-4-53248"
 
   gke_cluster_admin_users = [
     "d.cantella@nebuly.ai",
@@ -63,11 +64,8 @@ module "platform" {
   #   master_ipv4_cidr_block  = "172.172.16.0/28"
   # }
 
-  openai_api_key                     = var.openai_api_key
-  openai_endpoint                    = "https://api.openai.com/v1"
-  openai_gpt4o_deployment_name       = "gpt-4o"
-  openai_gpt5_deployment_name        = "gpt-5"
-  openai_translation_deployment_name = "gpt-4o-mini"
+  openai_api_key  = var.openai_api_key
+  openai_endpoint = "https://api.openai.com/v1"
 
   microsoft_sso = var.microsoft_sso
 
@@ -77,20 +75,21 @@ module "platform" {
   gke_kubernetes_version = "1.36."
   gke_node_pools = {
     "web-services" : {
-      machine_type = "n2-highmem-4"
+      machine_type = "n4-highmem-16"
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1
+      disk_type    = "hyperdisk-balanced"
       resource_labels = {
         "goog-gke-node-pool-provisioning-model" = "on-demand"
       }
     }
     "clickhouse" : {
-      machine_type = "n2-highmem-4"
+      machine_type = "c4-highmem-32"
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1
-      disk_type    = "pd-ssd"
+      disk_type    = "hyperdisk-balanced"
       disk_size_gb = 128
       resource_labels = {
         "goog-gke-node-pool-provisioning-model" = "on-demand"
@@ -107,17 +106,16 @@ module "platform" {
       ]
     }
     "gpu-primary" : {
-      machine_type = "a2-highgpu-1g"
+      machine_type = "a2-ultragpu-8g"
       min_nodes    = 0
       max_nodes    = 1
       node_count   = null
       node_locations = [
         "europe-west4-a",
-        "europe-west4-b",
       ]
       guest_accelerator = {
         type  = "nvidia-tesla-a100"
-        count = 1
+        count = 8
       }
       labels = {
         "gke-no-default-nvidia-gpu-device-plugin" : true,
