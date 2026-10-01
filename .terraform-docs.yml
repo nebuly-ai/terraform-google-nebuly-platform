@@ -36,8 +36,17 @@ content: |-
   - [cloudresourcemanager.googleapis.com](https://cloud.google.com/resource-manager/reference/rest)
   - [container.googleapis.com](https://cloud.google.com/kubernetes-engine/docs/reference/rest)
   - [secretmanager.googleapis.com](https://cloud.google.com/secret-manager/docs/reference/rest)
+  - [aiplatform.googleapis.com](https://cloud.google.com/vertex-ai/docs/reference/rest) (required when `vertex_ai.enabled` is true, the default)
 
   You can enable the APIs using either the GCP Console or the gcloud CLI, as explained in the [GCP Documentation](https://cloud.google.com/endpoints/docs/openapi/enable-api#gcloud).
+
+  ### Vertex AI (Gemini) LLM tiers
+
+  By default (`vertex_ai.enabled = true`), the module grants GKE Workload Identity principals `roles/aiplatform.user` and emits only the Helm **`vertexAi`** block (defaults: `gemini-3.1-pro` for tier1 and tier2, `gemini-3.8-flash` for tier3). Authentication uses in-cluster Application Default Credentials—no Gemini API keys. **OpenAI is not provisioned** (no API key secret, no `openAi` key in Helm values).
+
+  Vertex AI and OpenAI are **mutually exclusive**: generated Helm values include **`vertexAi` or `openAi`**, never both. Set `vertex_ai.enabled = false` and provide `openai_api_key` and `openai_endpoint` to emit only the **`openAi`** block (`openai_tier*_model_deployment_name`).
+
+  Ensure sufficient **Gemini 3.x** quota in `vertex_ai.location` (defaults to `region`). Nebuly Helm chart and application support for Vertex routing is still pending.
 
   ### Required GCP Quotas
 

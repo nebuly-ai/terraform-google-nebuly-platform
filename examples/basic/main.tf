@@ -41,8 +41,11 @@ module "nebuly" {
 
   platform_domain = "<your-domain.com>"
 
-  openai_api_key  = "my-key"
-  openai_endpoint = "https://api.openai.com/v1"
+  # Vertex AI is enabled by default (Gemini tier1–3). OpenAI is not used.
+  # For OpenAI-only:
+  # vertex_ai       = { enabled = false }
+  # openai_api_key  = "my-key"
+  # openai_endpoint = "https://api.openai.com/v1"
   nebuly_credentials = {
     client_id     = "<your-nebuly-client-id>"
     client_secret = "<your-nebuly-client-secret>"

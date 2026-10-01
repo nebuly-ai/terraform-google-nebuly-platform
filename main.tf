@@ -386,6 +386,17 @@ resource "google_project_iam_member" "gke_secret_accessors" {
     google_container_cluster.main,
   ]
 }
+resource "google_project_iam_member" "gke_vertex_ai_users" {
+  for_each = local.vertex_ai_enabled ? var.gke_nebuly_namespaces : toset([])
+
+  project = data.google_project.current.project_id
+  role    = "roles/aiplatform.user"
+  member  = "principal://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${data.google_project.current.project_id}.svc.id.goog/subject/ns/${each.key}/sa/${var.gke_service_account_name}"
+
+  depends_on = [
+    google_container_cluster.main,
+  ]
+}
 resource "google_storage_bucket_iam_binding" "gke_storage_object_user" {
   bucket = google_storage_bucket.main.name
   role   = "roles/storage.objectUser"
@@ -430,6 +441,8 @@ resource "google_secret_manager_secret_version" "jwt_signing_key" {
 
 # ------ External Credentials ------ #
 resource "google_secret_manager_secret" "openai_api_key" {
+  count = local.openai_enabled ? 1 : 0
+
   secret_id = "${var.resource_prefix}-openai-api-key"
   labels    = var.labels
 
@@ -438,7 +451,9 @@ resource "google_secret_manager_secret" "openai_api_key" {
   }
 }
 resource "google_secret_manager_secret_version" "openai_api_key" {
-  secret      = google_secret_manager_secret.openai_api_key.id
+  count = local.openai_enabled ? 1 : 0
+
+  secret      = google_secret_manager_secret.openai_api_key[0].id
   secret_data = var.openai_api_key
 }
 resource "google_secret_manager_secret" "nebuly_client_id" {
@@ -566,6 +581,13 @@ locals {
   # Enable ClickHouse helm values when a dedicated clickhouse node pool is defined.
   clickhouse_enabled = contains(keys(var.gke_node_pools), "clickhouse")
 
+  vertex_ai_enabled     = var.vertex_ai.enabled
+  openai_enabled        = !var.vertex_ai.enabled
+  vertex_ai_location    = coalesce(var.vertex_ai.location, var.region)
+  vertex_ai_tier1_model = var.vertex_ai.tier1_model
+  vertex_ai_tier2_model = var.vertex_ai.tier2_model
+  vertex_ai_tier3_model = var.vertex_ai.tier3_model
+
   # k8s secrets keys
   k8s_secret_key_analytics_db_username       = "analytics-db-username"
   k8s_secret_key_analytics_db_password       = "analytics-db-password"
@@ -624,6 +646,13 @@ locals {
 
       gcp_bucket_name  = google_storage_bucket.main.name
       gcp_project_name = data.google_project.current.project_id
+
+      vertex_ai_enabled     = local.vertex_ai_enabled
+      vertex_ai_location    = local.vertex_ai_location
+      vertex_ai_tier1_model = local.vertex_ai_tier1_model
+      vertex_ai_tier2_model = local.vertex_ai_tier2_model
+      vertex_ai_tier3_model = local.vertex_ai_tier3_model
+      openai_enabled        = local.openai_enabled
     },
   )
   secret_provider_class = templatefile(
@@ -637,7 +666,8 @@ locals {
       secret_name_auth_db_password            = google_secret_manager_secret_version.postgres_auth_password.name
       secret_name_analytics_db_username       = google_secret_manager_secret_version.postgres_analytics_username.name
       secret_name_analytics_db_password       = google_secret_manager_secret_version.postgres_analytics_password.name
-      secret_name_openai_api_key              = google_secret_manager_secret_version.openai_api_key.name
+      openai_enabled                          = local.openai_enabled
+      secret_name_openai_api_key              = local.openai_enabled ? google_secret_manager_secret_version.openai_api_key[0].name : ""
       secret_name_microsoft_sso_client_id     = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_id[0].name
       secret_name_microsoft_sso_client_secret = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_secret[0].name
       secret_name_okta_sso_client_id          = var.okta_sso == null ? "" : google_secret_manager_secret_version.okta_sso_client_id[0].name

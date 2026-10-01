@@ -20,8 +20,17 @@ Before using this Terraform module, ensure that the following GCP APIs are enabl
 - [cloudresourcemanager.googleapis.com](https://cloud.google.com/resource-manager/reference/rest)
 - [container.googleapis.com](https://cloud.google.com/kubernetes-engine/docs/reference/rest)
 - [secretmanager.googleapis.com](https://cloud.google.com/secret-manager/docs/reference/rest)
+- [aiplatform.googleapis.com](https://cloud.google.com/vertex-ai/docs/reference/rest) (required when `vertex_ai.enabled` is true, the default)
 
 You can enable the APIs using either the GCP Console or the gcloud CLI, as explained in the [GCP Documentation](https://cloud.google.com/endpoints/docs/openapi/enable-api#gcloud).
+
+### Vertex AI (Gemini) LLM tiers
+
+By default (`vertex_ai.enabled = true`), the module grants GKE Workload Identity principals `roles/aiplatform.user` and emits only the Helm **`vertexAi`** block (defaults: `gemini-3.1-pro` for tier1 and tier2, `gemini-3.8-flash` for tier3). Authentication uses in-cluster Application Default Credentials—no Gemini API keys. **OpenAI is not provisioned** (no API key secret, no `openAi` key in Helm values).
+
+Vertex AI and OpenAI are **mutually exclusive**: generated Helm values include **`vertexAi` or `openAi`**, never both. Set `vertex_ai.enabled = false` and provide `openai_api_key` and `openai_endpoint` to emit only the **`openAi`** block (`openai_tier*_model_deployment_name`).
+
+Ensure sufficient **Gemini 3.x** quota in `vertex_ai.location` (defaults to `region`). Nebuly Helm chart and application support for Vertex routing is still pending.
 
 ### Required GCP Quotas
 
@@ -205,8 +214,8 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_nebuly_credentials"></a> [nebuly\_credentials](#input\_nebuly\_credentials) | The credentials provided by Nebuly are required for activating your platform installation. <br/>  If you haven't received your credentials or have lost them, please contact support@nebuly.ai. | <pre>object({<br/>    client_id : string<br/>    client_secret : string<br/>  })</pre> | n/a | yes |
 | <a name="input_network_cidr_blocks"></a> [network\_cidr\_blocks](#input\_network\_cidr\_blocks) | The CIDR blocks of the VPC network used by Nebuly.<br/><br/>  - primary: The primary CIDR block of the VPC network.<br/>  - secondary\_gke\_pods: The secondary CIDR block used by GKE for pods.<br/>  - secondary\_gke\_services: The secondary CIDR block used by GKE for services. | <pre>object({<br/>    primary : string<br/>    secondary_gke_pods : string<br/>    secondary_gke_services : string<br/>  })</pre> | <pre>{<br/>  "primary": "10.0.0.0/16",<br/>  "secondary_gke_pods": "10.4.0.0/16",<br/>  "secondary_gke_services": "10.6.0.0/16"<br/>}</pre> | no |
 | <a name="input_okta_sso"></a> [okta\_sso](#input\_okta\_sso) | Settings for configuring the Okta OIDC SSO integration. | <pre>object({<br/>    client_id : string<br/>    client_secret : string<br/>    issuer : string<br/>  })</pre> | `null` | no |
-| <a name="input_openai_api_key"></a> [openai\_api\_key](#input\_openai\_api\_key) | The API Key used for authenticating with OpenAI. | `string` | n/a | yes |
-| <a name="input_openai_endpoint"></a> [openai\_endpoint](#input\_openai\_endpoint) | The endpoint of the OpenAI API. | `string` | n/a | yes |
+| <a name="input_openai_api_key"></a> [openai\_api\_key](#input\_openai\_api\_key) | The API Key used for authenticating with OpenAI. Required when vertex\_ai.enabled is false. | `string` | `null` | no |
+| <a name="input_openai_endpoint"></a> [openai\_endpoint](#input\_openai\_endpoint) | The endpoint of the OpenAI API. Required when vertex\_ai.enabled is false. | `string` | `null` | no |
 | <a name="input_openai_tier1_model_deployment_name"></a> [openai\_tier1\_model\_deployment\_name](#input\_openai\_tier1\_model\_deployment\_name) | The name of the deployment to use for tier 1 model workloads. | `string` | `"gpt-5.6-sol"` | no |
 | <a name="input_openai_tier2_model_deployment_name"></a> [openai\_tier2\_model\_deployment\_name](#input\_openai\_tier2\_model\_deployment\_name) | The name of the deployment to use for tier 2 model workloads. | `string` | `"gpt-5.6-terra"` | no |
 | <a name="input_openai_tier3_model_deployment_name"></a> [openai\_tier3\_model\_deployment\_name](#input\_openai\_tier3\_model\_deployment\_name) | The name of the deployment to use for tier 3 model workloads. | `string` | `"gpt-5.6-luna"` | no |
@@ -220,6 +229,7 @@ You can find examples of code that uses this Terraform module in the [examples](
 | <a name="input_postgres_server_tier"></a> [postgres\_server\_tier](#input\_postgres\_server\_tier) | The tier of the PostgreSQL server. Default value: 4 vCPU, 16GB memory. | `string` | `"db-custom-4-16384"` | no |
 | <a name="input_region"></a> [region](#input\_region) | The region where the resources will be created | `string` | n/a | yes |
 | <a name="input_resource_prefix"></a> [resource\_prefix](#input\_resource\_prefix) | The prefix that is used for generating resource names. | `string` | n/a | yes |
+| <a name="input_vertex_ai"></a> [vertex\_ai](#input\_vertex\_ai) | Vertex AI / Agent Platform integration for tiered LLM workloads on GKE.<br/>  When enabled (default), generated Helm values route tier1–tier3 to Gemini on Vertex AI<br/>  via Workload Identity. OpenAI is not provisioned (mutually exclusive with OpenAI).<br/>  Set enabled = false to use OpenAI only (openai\_api\_key and openai\_endpoint required). | <pre>object({<br/>    enabled     = optional(bool, true)<br/>    location    = optional(string)<br/>    tier1_model = optional(string, "gemini-3.1-pro")<br/>    tier2_model = optional(string, "gemini-3.1-pro")<br/>    tier3_model = optional(string, "gemini-3.8-flash")<br/>  })</pre> | `{}` | no |
 
 ## Resources
 
@@ -230,28 +240,29 @@ You can find examples of code that uses this Terraform module in the [examples](
 - resource.google_compute_subnetwork.main (/terraform-docs/main.tf#57)
 - resource.google_container_cluster.main (/terraform-docs/main.tf#228)
 - resource.google_container_node_pool.main (/terraform-docs/main.tf#310)
-- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#401)
+- resource.google_project_iam_binding.gke_cluster_admin (/terraform-docs/main.tf#412)
 - resource.google_project_iam_member.gke_secret_accessors (/terraform-docs/main.tf#378)
-- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#418)
-- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#470)
-- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#486)
-- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#444)
-- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#456)
-- resource.google_secret_manager_secret.okta_sso_client_id (/terraform-docs/main.tf#504)
-- resource.google_secret_manager_secret.okta_sso_client_secret (/terraform-docs/main.tf#520)
-- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#432)
+- resource.google_project_iam_member.gke_vertex_ai_users (/terraform-docs/main.tf#389)
+- resource.google_secret_manager_secret.jwt_signing_key (/terraform-docs/main.tf#429)
+- resource.google_secret_manager_secret.microsoft_sso_client_id (/terraform-docs/main.tf#485)
+- resource.google_secret_manager_secret.microsoft_sso_client_secret (/terraform-docs/main.tf#501)
+- resource.google_secret_manager_secret.nebuly_client_id (/terraform-docs/main.tf#459)
+- resource.google_secret_manager_secret.nebuly_client_secret (/terraform-docs/main.tf#471)
+- resource.google_secret_manager_secret.okta_sso_client_id (/terraform-docs/main.tf#519)
+- resource.google_secret_manager_secret.okta_sso_client_secret (/terraform-docs/main.tf#535)
+- resource.google_secret_manager_secret.openai_api_key (/terraform-docs/main.tf#443)
 - resource.google_secret_manager_secret.postgres_analytics_password (/terraform-docs/main.tf#164)
 - resource.google_secret_manager_secret.postgres_analytics_username (/terraform-docs/main.tf#152)
 - resource.google_secret_manager_secret.postgres_auth_password (/terraform-docs/main.tf#205)
 - resource.google_secret_manager_secret.postgres_auth_username (/terraform-docs/main.tf#193)
-- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#426)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#480)
-- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#496)
-- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#452)
-- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#464)
-- resource.google_secret_manager_secret_version.okta_sso_client_id (/terraform-docs/main.tf#514)
-- resource.google_secret_manager_secret_version.okta_sso_client_secret (/terraform-docs/main.tf#530)
-- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#440)
+- resource.google_secret_manager_secret_version.jwt_signing_key (/terraform-docs/main.tf#437)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_id (/terraform-docs/main.tf#495)
+- resource.google_secret_manager_secret_version.microsoft_sso_client_secret (/terraform-docs/main.tf#511)
+- resource.google_secret_manager_secret_version.nebuly_client_id (/terraform-docs/main.tf#467)
+- resource.google_secret_manager_secret_version.nebuly_client_secret (/terraform-docs/main.tf#479)
+- resource.google_secret_manager_secret_version.okta_sso_client_id (/terraform-docs/main.tf#529)
+- resource.google_secret_manager_secret_version.okta_sso_client_secret (/terraform-docs/main.tf#545)
+- resource.google_secret_manager_secret_version.openai_api_key (/terraform-docs/main.tf#453)
 - resource.google_secret_manager_secret_version.postgres_analytics_password (/terraform-docs/main.tf#172)
 - resource.google_secret_manager_secret_version.postgres_analytics_username (/terraform-docs/main.tf#160)
 - resource.google_secret_manager_secret_version.postgres_auth_password (/terraform-docs/main.tf#213)
@@ -263,11 +274,11 @@ You can find examples of code that uses this Terraform module in the [examples](
 - resource.google_sql_database_instance.main (/terraform-docs/main.tf#89)
 - resource.google_sql_user.analytics (/terraform-docs/main.tf#147)
 - resource.google_sql_user.auth (/terraform-docs/main.tf#188)
-- resource.google_storage_bucket.main (/terraform-docs/main.tf#539)
-- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#389)
+- resource.google_storage_bucket.main (/terraform-docs/main.tf#554)
+- resource.google_storage_bucket_iam_binding.gke_storage_object_user (/terraform-docs/main.tf#400)
 - resource.random_password.analytics (/terraform-docs/main.tf#142)
 - resource.random_password.auth (/terraform-docs/main.tf#183)
-- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#414)
+- resource.tls_private_key.jwt_signing_key (/terraform-docs/main.tf#425)
 - data source.google_compute_zones.available (/terraform-docs/main.tf#23)
 - data source.google_container_engine_versions.main (/terraform-docs/main.tf#24)
 - data source.google_project.current (/terraform-docs/main.tf#22)

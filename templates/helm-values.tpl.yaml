@@ -254,6 +254,7 @@ frontend:
         hosts:
           - ${platform_domain}
 
+%{ if openai_enabled ~}
 openAi:
   enabled: true
   tier1ModelDeployment: ${openai_tier1_model_deployment}
@@ -264,6 +265,18 @@ openAi:
   existingSecret:
     name: ${secret_provider_class_secret_name}
     apiKey: ${k8s_secret_key_openai_api_key}
+%{ endif ~}
+
+%{ if vertex_ai_enabled ~}
+vertexAi:
+  enabled: true
+  project: ${gcp_project_name}
+  location: ${vertex_ai_location}
+  tier1Model: ${vertex_ai_tier1_model}
+  tier2Model: ${vertex_ai_tier2_model}
+  tier3Model: ${vertex_ai_tier3_model}
+  authentication: workloadIdentity
+%{ endif ~}
 
 mcpServer:
   enabled: true

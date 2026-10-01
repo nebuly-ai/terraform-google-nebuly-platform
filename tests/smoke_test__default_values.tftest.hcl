@@ -20,9 +20,6 @@ run "smoke_test_plan" {
   variables {
     platform_domain = "test.nebuly.com"
 
-    openai_api_key  = "test"
-    openai_endpoint = "https://test.nebuly.com"
-
     gke_cluster_admin_users = []
 
     nebuly_credentials = {

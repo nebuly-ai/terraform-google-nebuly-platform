@@ -20,10 +20,6 @@ run "smoke_test_plan" {
   variables {
     platform_domain = "test.nebuly.com"
 
-    openai_api_key              = "test"
-    openai_endpoint             = "https://test.nebuly.com"
-
-
     # ------ Microsoft SSO ------ #
     microsoft_sso = {
       tenant_id : "my-tenant-id"
