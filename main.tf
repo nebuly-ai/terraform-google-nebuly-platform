@@ -286,10 +286,16 @@ resource "google_container_cluster" "main" {
     data.google_compute_zones.available.names[0],
   ]
 
+  # Initial control-plane version only. REGULAR auto-upgrade owns it afterwards;
+  # a later lookup of gke_kubernetes_version can return a version the channel no longer accepts.
   min_master_version  = data.google_container_engine_versions.main.latest_master_version
   deletion_protection = var.gke_delete_protection
 
-
+  lifecycle {
+    ignore_changes = [
+      min_master_version,
+    ]
+  }
 
   maintenance_policy {
     recurring_window {
