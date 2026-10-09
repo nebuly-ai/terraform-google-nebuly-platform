@@ -58,8 +58,8 @@ variable "google_agent_platform" {
   type = object({
     enabled     = optional(bool, true)
     location    = optional(string, "global")
-    tier1_model = optional(string, "gemini-3.1-pro")
-    tier2_model = optional(string, "gemini-3.1-pro")
+    tier1_model = optional(string, "gemini-3.1-pro-preview")
+    tier2_model = optional(string, "gemini-3.1-pro-preview")
     tier3_model = optional(string, "gemini-3.8-flash")
   })
   default = {}

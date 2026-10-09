@@ -1,1 +1,1 @@
-region = "europe-west4"
+region = "us-central1"

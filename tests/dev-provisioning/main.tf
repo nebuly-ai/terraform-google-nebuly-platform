@@ -36,11 +36,6 @@ variable "nebuly_credentials" {
   })
 }
 
-variable "openai_api_key" {
-  type = string
-}
-
-
 # ------ Main ------ #
 module "platform" {
   source = "../.."
@@ -52,7 +47,7 @@ module "platform" {
   postgres_server_high_availability = {
     enabled = false
   }
-  postgres_server_tier = "db-custom-4-53248"
+  postgres_server_tier = "db-custom-4-16384"
 
   gke_cluster_admin_users = [
     "d.cantella@nebuly.ai",
@@ -64,9 +59,6 @@ module "platform" {
   #   master_ipv4_cidr_block  = "172.172.16.0/28"
   # }
 
-  openai_api_key  = var.openai_api_key
-  openai_endpoint = "https://api.openai.com/v1"
-
   microsoft_sso = var.microsoft_sso
 
   platform_domain    = "platform.gcp.testing.nebuly.com"
@@ -75,20 +67,20 @@ module "platform" {
   gke_kubernetes_version = "1.36."
   gke_node_pools = {
     "web-services" : {
-      machine_type = "n4-highmem-16"
+      machine_type = "n2-highmem-4"
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1
-      disk_type    = "hyperdisk-balanced"
       resource_labels = {
         "goog-gke-node-pool-provisioning-model" = "on-demand"
       }
     }
     "clickhouse" : {
-      machine_type = "c4-highmem-32"
+      machine_type = "c4-highmem-4"
       min_nodes    = 1
       max_nodes    = 1
       node_count   = 1
+      node_locations = ["us-central1-c"]
       disk_type    = "hyperdisk-balanced"
       disk_size_gb = 128
       resource_labels = {
@@ -106,23 +98,21 @@ module "platform" {
       ]
     }
     "gpu-primary" : {
-      machine_type = "a2-ultragpu-8g"
-      min_nodes    = 0
+      machine_type = "g2-standard-8"
+      min_nodes    = 1
       max_nodes    = 1
-      node_count   = null
-      node_locations = [
-        "europe-west4-a",
-      ]
+      node_count   = 1
+      node_locations = ["us-central1-b"]
       guest_accelerator = {
-        type  = "nvidia-tesla-a100"
-        count = 8
+        type  = "nvidia-l4"
+        count = 1
       }
       labels = {
         "gke-no-default-nvidia-gpu-device-plugin" : true,
-        "nebuly.com/accelerator" : "nvidia-tesla-a100",
+        "nebuly.com/accelerator" : "nvidia-l4",
       }
       resource_labels = {
-        "goog-gke-accelerator-type"             = "nvidia-tesla-a100"
+        "goog-gke-accelerator-type"             = "nvidia-l4"
         "goog-gke-node-pool-provisioning-model" = "on-demand"
       }
     }
@@ -133,10 +123,10 @@ output "gke_cluster_get_credentials" {
   value = module.platform.gke_cluster_get_credentials
 }
 output "helm_values" {
-  value = module.platform.helm_values
+  value     = module.platform.helm_values
   sensitive = true
 }
 output "secret_provider_class" {
-  value = module.platform.secret_provider_class
+  value     = module.platform.secret_provider_class
   sensitive = true
 }
