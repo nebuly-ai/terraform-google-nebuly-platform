@@ -41,7 +41,7 @@ module "nebuly" {
 
   platform_domain = "<your-domain.com>"
 
-  # Vertex AI enabled by default. For OpenAI-only: vertex_ai = { enabled = false }, openai_api_key, openai_endpoint.
+  # Google Agent Platform enabled by default. For OpenAI-only: google_agent_platform = { enabled = false }, openai_api_key, openai_endpoint.
   nebuly_credentials = {
     client_id     = "<your-nebuly-client-id>"
     client_secret = "<your-nebuly-client-secret>"

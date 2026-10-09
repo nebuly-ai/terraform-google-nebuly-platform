@@ -264,7 +264,7 @@ resource "google_container_cluster" "main" {
 
 
   release_channel {
-    channel = "UNSPECIFIED"
+    channel = "REGULAR"
   }
 
   ip_allocation_policy {
@@ -329,7 +329,7 @@ resource "google_container_node_pool" "main" {
 
   management {
     auto_repair  = true
-    auto_upgrade = false
+    auto_upgrade = true
   }
 
   version = data.google_container_engine_versions.main.latest_node_version
@@ -372,6 +372,7 @@ resource "google_container_node_pool" "main" {
     ignore_changes = [
       node_config[0].kubelet_config,
       initial_node_count,
+      version,
     ]
   }
 }
@@ -386,8 +387,8 @@ resource "google_project_iam_member" "gke_secret_accessors" {
     google_container_cluster.main,
   ]
 }
-resource "google_project_iam_member" "gke_vertex_ai_users" {
-  for_each = local.vertex_ai_enabled ? var.gke_nebuly_namespaces : toset([])
+resource "google_project_iam_member" "gke_google_agent_platform_users" {
+  for_each = local.google_agent_platform_enabled ? var.gke_nebuly_namespaces : toset([])
 
   project = data.google_project.current.project_id
   role    = "roles/aiplatform.user"
@@ -559,6 +560,26 @@ resource "google_storage_bucket" "main" {
   labels                      = var.labels
   storage_class               = "STANDARD"
 }
+resource "google_storage_bucket" "loki" {
+  name                        = "${var.resource_prefix}loki-${data.google_project.current.project_id}"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
+  labels                      = var.labels
+  storage_class               = "STANDARD"
+}
+resource "google_storage_bucket_iam_binding" "loki_storage_object_user" {
+  bucket = google_storage_bucket.loki.name
+  role   = "roles/storage.objectUser"
+  members = [
+    for namespace in var.gke_nebuly_namespaces :
+    "principal://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${data.google_project.current.project_id}.svc.id.goog/subject/ns/${namespace}/sa/loki"
+  ]
+
+  depends_on = [
+    google_container_cluster.main,
+  ]
+}
 
 
 # ------ Post provisioning ------ #
@@ -581,12 +602,12 @@ locals {
   # Enable ClickHouse helm values when a dedicated clickhouse node pool is defined.
   clickhouse_enabled = contains(keys(var.gke_node_pools), "clickhouse")
 
-  vertex_ai_enabled     = var.vertex_ai.enabled
-  openai_enabled        = !var.vertex_ai.enabled
-  vertex_ai_location    = coalesce(var.vertex_ai.location, var.region)
-  vertex_ai_tier1_model = var.vertex_ai.tier1_model
-  vertex_ai_tier2_model = var.vertex_ai.tier2_model
-  vertex_ai_tier3_model = var.vertex_ai.tier3_model
+  google_agent_platform_enabled     = var.google_agent_platform.enabled
+  openai_enabled                    = !var.google_agent_platform.enabled
+  google_agent_platform_location    = var.google_agent_platform.location
+  google_agent_platform_tier1_model = var.google_agent_platform.tier1_model
+  google_agent_platform_tier2_model = var.google_agent_platform.tier2_model
+  google_agent_platform_tier3_model = var.google_agent_platform.tier3_model
 
   # k8s secrets keys
   k8s_secret_key_analytics_db_username       = "analytics-db-username"
@@ -644,15 +665,16 @@ locals {
       auth_postgres_server_url      = google_sql_database_instance.main.private_ip_address
       auth_postgres_db_name         = google_sql_database.auth.name
 
-      gcp_bucket_name  = google_storage_bucket.main.name
-      gcp_project_name = data.google_project.current.project_id
+      gcp_bucket_name      = google_storage_bucket.main.name
+      gcp_project_name     = data.google_project.current.project_id
+      loki_gcs_bucket_name = google_storage_bucket.loki.name
 
-      vertex_ai_enabled     = local.vertex_ai_enabled
-      vertex_ai_location    = local.vertex_ai_location
-      vertex_ai_tier1_model = local.vertex_ai_tier1_model
-      vertex_ai_tier2_model = local.vertex_ai_tier2_model
-      vertex_ai_tier3_model = local.vertex_ai_tier3_model
-      openai_enabled        = local.openai_enabled
+      google_agent_platform_enabled     = local.google_agent_platform_enabled
+      google_agent_platform_location    = local.google_agent_platform_location
+      google_agent_platform_tier1_model = local.google_agent_platform_tier1_model
+      google_agent_platform_tier2_model = local.google_agent_platform_tier2_model
+      google_agent_platform_tier3_model = local.google_agent_platform_tier3_model
+      openai_enabled                    = local.openai_enabled
     },
   )
   secret_provider_class = templatefile(

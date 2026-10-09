@@ -267,14 +267,14 @@ openAi:
     apiKey: ${k8s_secret_key_openai_api_key}
 %{ endif ~}
 
-%{ if vertex_ai_enabled ~}
-vertexAi:
+%{ if google_agent_platform_enabled ~}
+google:
   enabled: true
   project: ${gcp_project_name}
-  location: ${vertex_ai_location}
-  tier1Model: ${vertex_ai_tier1_model}
-  tier2Model: ${vertex_ai_tier2_model}
-  tier3Model: ${vertex_ai_tier3_model}
+  location: ${google_agent_platform_location}
+  tier1ModelDeployment: ${google_agent_platform_tier1_model}
+  tier2ModelDeployment: ${google_agent_platform_tier2_model}
+  tier3ModelDeployment: ${google_agent_platform_tier3_model}
   authentication: workloadIdentity
 %{ endif ~}
 
@@ -300,11 +300,38 @@ mcpServer:
         hosts:
           - ${platform_domain}
 
+loki:
+  minio:
+    enabled: false
+  serviceAccount:
+    create: true
+    name: loki
+  loki:
+    schemaConfig:
+      configs:
+        - from: "2024-04-01"
+          store: tsdb
+          object_store: gcs
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+    storage:
+      type: gcs
+      bucketNames:
+        chunks: ${loki_gcs_bucket_name}
+        ruler: ${loki_gcs_bucket_name}
+    compactor:
+      delete_request_store: gcs
+  singleBinary:
+    persistence:
+      storageClass: standard-rwo
+
 %{ if clickhouse_enabled }
 clickhouse:
   enabled: true
   storage:
-    storageClassName: standard-rwo
+    storageClassName: hyperdisk-balanced
   tolerations:
     - effect: NoSchedule
       key: nebuly.com/reserved

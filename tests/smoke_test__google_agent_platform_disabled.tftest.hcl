@@ -12,7 +12,7 @@ provider "google" {
   credentials = run.setup.credentials
 }
 
-run "smoke_test_plan_vertex_disabled" {
+run "smoke_test_plan_google_agent_platform_disabled" {
   command = plan
 
   variables {
@@ -23,7 +23,7 @@ run "smoke_test_plan_vertex_disabled" {
 
     gke_cluster_admin_users = []
 
-    vertex_ai = {
+    google_agent_platform = {
       enabled = false
     }
 

@@ -21,16 +21,16 @@ variable "platform_domain" {
   }
 }
 variable "openai_endpoint" {
-  description = "The endpoint of the OpenAI API. Required when vertex_ai.enabled is false."
+  description = "The endpoint of the OpenAI API. Required when google_agent_platform.enabled is false."
   type        = string
   default     = null
 
   validation {
     condition = (
-      var.vertex_ai.enabled ||
+      var.google_agent_platform.enabled ||
       (var.openai_endpoint != null && trimspace(var.openai_endpoint) != "")
     )
-    error_message = "openai_endpoint must be provided when vertex_ai.enabled is false."
+    error_message = "openai_endpoint must be provided when google_agent_platform.enabled is false."
   }
 }
 variable "openai_tier1_model_deployment_name" {
@@ -48,16 +48,16 @@ variable "openai_tier3_model_deployment_name" {
   type        = string
   default     = "gpt-5.6-luna"
 }
-variable "vertex_ai" {
+variable "google_agent_platform" {
   description = <<EOT
-  Vertex AI / Agent Platform integration for tiered LLM workloads on GKE.
-  When enabled (default), generated Helm values route tier1–tier3 to Gemini on Vertex AI
+  Google Agent Platform integration for tiered LLM workloads on GKE.
+  When enabled (default), generated Helm values route tier1–tier3 to Gemini on Google Agent Platform
   via Workload Identity. OpenAI is not provisioned (mutually exclusive with OpenAI).
   Set enabled = false to use OpenAI only (openai_api_key and openai_endpoint required).
   EOT
   type = object({
     enabled     = optional(bool, true)
-    location    = optional(string)
+    location    = optional(string, "global")
     tier1_model = optional(string, "gemini-3.1-pro")
     tier2_model = optional(string, "gemini-3.1-pro")
     tier3_model = optional(string, "gemini-3.8-flash")
@@ -179,7 +179,7 @@ variable "gke_service_account_name" {
   type        = string
 }
 variable "gke_kubernetes_version" {
-  description = "The used Kubernetes version for the GKE cluster."
+  description = "Initial Kubernetes minor version for the GKE cluster (for example \"1.36.\"). GKE then auto-upgrades the cluster within the Regular release channel."
   type        = string
   default     = "1.36."
 }
@@ -286,17 +286,17 @@ variable "gke_maintenance_window" {
 
 # ------ External credentials ------ #
 variable "openai_api_key" {
-  description = "The API Key used for authenticating with OpenAI. Required when vertex_ai.enabled is false."
+  description = "The API Key used for authenticating with OpenAI. Required when google_agent_platform.enabled is false."
   type        = string
   default     = null
   sensitive   = true
 
   validation {
     condition = (
-      var.vertex_ai.enabled ||
+      var.google_agent_platform.enabled ||
       (var.openai_api_key != null && trimspace(var.openai_api_key) != "")
     )
-    error_message = "openai_api_key must be provided when vertex_ai.enabled is false."
+    error_message = "openai_api_key must be provided when google_agent_platform.enabled is false."
   }
 }
 variable "nebuly_credentials" {
