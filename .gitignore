@@ -9,3 +9,5 @@ credentials.json
 tests/dev-provisioning/*.yaml
 .DS_Store
 settings.json
+infracost.yml
+**/infracost-usage.yml

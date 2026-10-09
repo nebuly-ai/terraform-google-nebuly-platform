@@ -41,8 +41,7 @@ module "nebuly" {
 
   platform_domain = "<your-domain.com>"
 
-  openai_api_key  = "my-key"
-  openai_endpoint = "https://api.openai.com/v1"
+  # Google Agent Platform enabled by default. For OpenAI-only: google_agent_platform = { enabled = false }, openai_api_key, openai_endpoint.
   nebuly_credentials = {
     client_id     = "<your-nebuly-client-id>"
     client_secret = "<your-nebuly-client-secret>"

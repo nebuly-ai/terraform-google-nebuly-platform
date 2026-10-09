@@ -264,7 +264,7 @@ resource "google_container_cluster" "main" {
 
 
   release_channel {
-    channel = "UNSPECIFIED"
+    channel = "REGULAR"
   }
 
   ip_allocation_policy {
@@ -286,10 +286,16 @@ resource "google_container_cluster" "main" {
     data.google_compute_zones.available.names[0],
   ]
 
+  # Initial control-plane version only. REGULAR auto-upgrade owns it afterwards;
+  # a later lookup of gke_kubernetes_version can return a version the channel no longer accepts.
   min_master_version  = data.google_container_engine_versions.main.latest_master_version
   deletion_protection = var.gke_delete_protection
 
-
+  lifecycle {
+    ignore_changes = [
+      min_master_version,
+    ]
+  }
 
   maintenance_policy {
     recurring_window {
@@ -329,7 +335,7 @@ resource "google_container_node_pool" "main" {
 
   management {
     auto_repair  = true
-    auto_upgrade = false
+    auto_upgrade = true
   }
 
   version = data.google_container_engine_versions.main.latest_node_version
@@ -372,6 +378,7 @@ resource "google_container_node_pool" "main" {
     ignore_changes = [
       node_config[0].kubelet_config,
       initial_node_count,
+      version,
     ]
   }
 }
@@ -380,6 +387,17 @@ resource "google_project_iam_member" "gke_secret_accessors" {
 
   project = data.google_project.current.project_id
   role    = "roles/secretmanager.secretAccessor"
+  member  = "principal://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${data.google_project.current.project_id}.svc.id.goog/subject/ns/${each.key}/sa/${var.gke_service_account_name}"
+
+  depends_on = [
+    google_container_cluster.main,
+  ]
+}
+resource "google_project_iam_member" "gke_google_agent_platform_users" {
+  for_each = local.google_agent_platform_enabled ? var.gke_nebuly_namespaces : toset([])
+
+  project = data.google_project.current.project_id
+  role    = "roles/aiplatform.user"
   member  = "principal://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${data.google_project.current.project_id}.svc.id.goog/subject/ns/${each.key}/sa/${var.gke_service_account_name}"
 
   depends_on = [
@@ -430,6 +448,8 @@ resource "google_secret_manager_secret_version" "jwt_signing_key" {
 
 # ------ External Credentials ------ #
 resource "google_secret_manager_secret" "openai_api_key" {
+  count = local.openai_enabled ? 1 : 0
+
   secret_id = "${var.resource_prefix}-openai-api-key"
   labels    = var.labels
 
@@ -438,7 +458,9 @@ resource "google_secret_manager_secret" "openai_api_key" {
   }
 }
 resource "google_secret_manager_secret_version" "openai_api_key" {
-  secret      = google_secret_manager_secret.openai_api_key.id
+  count = local.openai_enabled ? 1 : 0
+
+  secret      = google_secret_manager_secret.openai_api_key[0].id
   secret_data = var.openai_api_key
 }
 resource "google_secret_manager_secret" "nebuly_client_id" {
@@ -544,6 +566,26 @@ resource "google_storage_bucket" "main" {
   labels                      = var.labels
   storage_class               = "STANDARD"
 }
+resource "google_storage_bucket" "loki" {
+  name                        = "${var.resource_prefix}loki-${data.google_project.current.project_id}"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
+  labels                      = var.labels
+  storage_class               = "STANDARD"
+}
+resource "google_storage_bucket_iam_binding" "loki_storage_object_user" {
+  bucket = google_storage_bucket.loki.name
+  role   = "roles/storage.objectUser"
+  members = [
+    for namespace in var.gke_nebuly_namespaces :
+    "principal://iam.googleapis.com/projects/${data.google_project.current.number}/locations/global/workloadIdentityPools/${data.google_project.current.project_id}.svc.id.goog/subject/ns/${namespace}/sa/loki"
+  ]
+
+  depends_on = [
+    google_container_cluster.main,
+  ]
+}
 
 
 # ------ Post provisioning ------ #
@@ -565,6 +607,13 @@ locals {
 
   # Enable ClickHouse helm values when a dedicated clickhouse node pool is defined.
   clickhouse_enabled = contains(keys(var.gke_node_pools), "clickhouse")
+
+  google_agent_platform_enabled     = var.google_agent_platform.enabled
+  openai_enabled                    = !var.google_agent_platform.enabled
+  google_agent_platform_location    = var.google_agent_platform.location
+  google_agent_platform_tier1_model = var.google_agent_platform.tier1_model
+  google_agent_platform_tier2_model = var.google_agent_platform.tier2_model
+  google_agent_platform_tier3_model = var.google_agent_platform.tier3_model
 
   # k8s secrets keys
   k8s_secret_key_analytics_db_username       = "analytics-db-username"
@@ -622,8 +671,16 @@ locals {
       auth_postgres_server_url      = google_sql_database_instance.main.private_ip_address
       auth_postgres_db_name         = google_sql_database.auth.name
 
-      gcp_bucket_name  = google_storage_bucket.main.name
-      gcp_project_name = data.google_project.current.project_id
+      gcp_bucket_name      = google_storage_bucket.main.name
+      gcp_project_name     = data.google_project.current.project_id
+      loki_gcs_bucket_name = google_storage_bucket.loki.name
+
+      google_agent_platform_enabled     = local.google_agent_platform_enabled
+      google_agent_platform_location    = local.google_agent_platform_location
+      google_agent_platform_tier1_model = local.google_agent_platform_tier1_model
+      google_agent_platform_tier2_model = local.google_agent_platform_tier2_model
+      google_agent_platform_tier3_model = local.google_agent_platform_tier3_model
+      openai_enabled                    = local.openai_enabled
     },
   )
   secret_provider_class = templatefile(
@@ -637,7 +694,8 @@ locals {
       secret_name_auth_db_password            = google_secret_manager_secret_version.postgres_auth_password.name
       secret_name_analytics_db_username       = google_secret_manager_secret_version.postgres_analytics_username.name
       secret_name_analytics_db_password       = google_secret_manager_secret_version.postgres_analytics_password.name
-      secret_name_openai_api_key              = google_secret_manager_secret_version.openai_api_key.name
+      openai_enabled                          = local.openai_enabled
+      secret_name_openai_api_key              = local.openai_enabled ? google_secret_manager_secret_version.openai_api_key[0].name : ""
       secret_name_microsoft_sso_client_id     = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_id[0].name
       secret_name_microsoft_sso_client_secret = var.microsoft_sso == null ? "" : google_secret_manager_secret_version.microsoft_sso_client_secret[0].name
       secret_name_okta_sso_client_id          = var.okta_sso == null ? "" : google_secret_manager_secret_version.okta_sso_client_id[0].name
